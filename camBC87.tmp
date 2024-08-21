@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://cos7vsxw5wgwr"]
+[gd_scene load_steps=17 format=3 uid="uid://cos7vsxw5wgwr"]
 
 [ext_resource type="Shader" path="res://paintable_element.gdshader" id="1_3y42g"]
 [ext_resource type="Script" path="res://camera_3d.gd" id="1_wgonw"]
@@ -47,23 +47,6 @@ shader_parameter/map_extents = null
 data = PackedVector3Array(-0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, -0.5)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_tyc0d"]
-resource_local_to_scene = true
-render_priority = 0
-shader = ExtResource("1_3y42g")
-shader_parameter/albedo = Color(1, 1, 1, 1)
-shader_parameter/point_size = null
-shader_parameter/roughness = null
-shader_parameter/metallic_texture_channel = null
-shader_parameter/specular = null
-shader_parameter/metallic = null
-shader_parameter/uv1_scale = null
-shader_parameter/uv1_offset = null
-shader_parameter/uv2_scale = null
-shader_parameter/uv2_offset = null
-shader_parameter/map_size = null
-shader_parameter/map_extents = null
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_ylhlc"]
 resource_local_to_scene = true
 render_priority = 0
 shader = ExtResource("1_3y42g")
@@ -188,16 +171,6 @@ surface_material_override/0 = SubResource("ShaderMaterial_tyc0d")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D7/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_pnw0f")
 
-[node name="MeshInstance3D8" type="MeshInstance3D" parent="." groups=["paintable_element"]]
-transform = Transform3D(7.43028, 0, 0.850015, 0, 10.7755, 0, -27.7302, 0, 0.227761, 0, -0.845324, -0.787615)
-mesh = SubResource("BoxMesh_8xnkm")
-surface_material_override/0 = SubResource("ShaderMaterial_ylhlc")
-
-[node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D8"]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D8/StaticBody3D"]
-shape = SubResource("ConcavePolygonShape3D_pnw0f")
-
 [node name="MeshInstance3D3" type="MeshInstance3D" parent="." groups=["paintable_element"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.50965, -0.845324, 0.863546)
 mesh = SubResource("BoxMesh_8xnkm")
@@ -239,7 +212,7 @@ surface_material_override/0 = SubResource("ShaderMaterial_3gikc")
 shape = SubResource("ConcavePolygonShape3D_pnw0f")
 
 [node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("world_painter", "raycast")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.000303745, 0.43046, 1.98705)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.447195, 1.98253)
 script = ExtResource("1_wgonw")
 world_painter = NodePath("../WorldPainter")
 raycast = NodePath("RayCast3D")

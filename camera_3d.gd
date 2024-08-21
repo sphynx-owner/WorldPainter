@@ -10,6 +10,9 @@ func _input(event: InputEvent) -> void:
 	
 	if Input.is_action_just_pressed("LeftClick"):
 		world_painter.paint(raycast.get_collision_point())
+	
+	if Input.is_action_just_pressed("RightClick"):
+		world_painter.erase(raycast.get_collision_point())
 
 func _ready():
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
