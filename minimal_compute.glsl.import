@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://cie3tk74g2kjs"
+path="res://.godot/imported/minimal_compute.glsl-964abc378aa4abb06132f42ba084fcee.res"
+
+[deps]
+
+source_file="res://minimal_compute.glsl"
+dest_files=["res://.godot/imported/minimal_compute.glsl-964abc378aa4abb06132f42ba084fcee.res"]
+
+[params]
+

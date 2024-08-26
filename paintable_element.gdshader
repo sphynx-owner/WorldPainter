@@ -26,14 +26,14 @@ uniform vec3 map_extents;
 
 void fragment() {
 	vec2 base_uv = UV;
-	
+
 	vec4 world_position = INV_VIEW_MATRIX * INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2. - 1., FRAGCOORD.z, 1.);
 	world_position.xyz /= world_position.w;
-	
+
 	vec3 truncated_world_position = vec3((world_position.xyz + map_extents / 2.) / map_extents);
-	
-	ALBEDO = vec3(texture(world_paint_texture, truncated_world_position).x);
-	
+
+	ALBEDO = vec3(mix(0.5, 1, texture(world_paint_texture, truncated_world_position).x));
+
 	float metallic_tex = dot(texture(texture_metallic, base_uv), metallic_texture_channel);
 	METALLIC = metallic_tex * metallic;
 	SPECULAR = specular;

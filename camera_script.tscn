@@ -245,7 +245,7 @@ world_painter = NodePath("../WorldPainter")
 raycast = NodePath("RayCast3D")
 
 [node name="RayCast3D" type="RayCast3D" parent="Camera3D"]
-target_position = Vector3(0, 0, -10)
+target_position = Vector3(0, 0, -100)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_fmhb4")
