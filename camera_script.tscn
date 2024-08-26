@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://cos7vsxw5wgwr"]
+[gd_scene load_steps=19 format=3 uid="uid://cos7vsxw5wgwr"]
 
 [ext_resource type="Shader" path="res://paintable_element.gdshader" id="1_3y42g"]
 [ext_resource type="Script" path="res://camera_3d.gd" id="1_wgonw"]
@@ -26,6 +26,8 @@ shader_parameter/map_extents = null
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_ujjs2"]
 data = PackedVector3Array(-0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, -0.5)
 
+[sub_resource type="PlaceholderTexture3D" id="PlaceholderTexture3D_40gae"]
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qe5le"]
 resource_local_to_scene = true
 render_priority = 0
@@ -42,6 +44,7 @@ shader_parameter/uv2_scale = null
 shader_parameter/uv2_offset = null
 shader_parameter/map_size = null
 shader_parameter/map_extents = null
+shader_parameter/world_paint_texture = SubResource("PlaceholderTexture3D_40gae")
 
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_pnw0f"]
 data = PackedVector3Array(-0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, -0.5)

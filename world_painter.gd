@@ -9,28 +9,14 @@ class_name WorldPainter
 
 @onready var images : Array[Image] = []
 
-@onready var image_3D : ImageTexture3D = ImageTexture3D.new()
-
-@onready var texture_3D : Texture3D = Texture3D.new()
-
-var image_3D_tex : RID 
-@onready var image_uniform = RDUniform.new()
+var texture_3D : RID 
+@onready var texture_uniform = RDUniform.new()
 var rd : RenderingDevice = null
 var shader_file : RDShaderFile
 var shader_bytecode
 var shader
 var pipeline
 func _ready():
-	for paintable in get_tree().get_nodes_in_group("paintable_element"):
-		paintable.get_surface_override_material(0).set_shader_parameter("world_paint_texture", image_3D)
-		paintable.get_surface_override_material(0).set_shader_parameter("map_size", map_size)
-		paintable.get_surface_override_material(0).set_shader_parameter("map_extents", map_extents)
-	
-	for index in map_size.z:
-		images.append(Image.create(map_size.x, map_size.y, false, Image.FORMAT_RF))
-	
-	image_3D.create(Image.FORMAT_RF, map_size.x, map_size.y, map_size.z, false, images)
-	
 	# We will be using our own RenderingDevice to handle the compute commands
 	rd = RenderingServer.create_local_rendering_device()
 	
@@ -40,39 +26,28 @@ func _ready():
 	shader = rd.shader_create_from_spirv(shader_spirv)
 	pipeline = rd.compute_pipeline_create(shader)
 	
-	var texture3D_format : RDTextureFormat = RDTextureFormat.new()
-	texture3D_format.width = map_size.x
-	texture3D_format.height = map_size.y
-	texture3D_format.depth = map_size.z
+	var texture_3D_format : RDTextureFormat = RDTextureFormat.new()
+	texture_3D_format.width = map_size.x
+	texture_3D_format.height = map_size.y
+	texture_3D_format.depth = map_size.z
 	
-	texture3D_format.texture_type = RenderingDevice.TEXTURE_TYPE_3D
+	texture_3D_format.texture_type = RenderingDevice.TEXTURE_TYPE_3D
 	
-	texture3D_format.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT
+	texture_3D_format.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT
 	
-	texture3D_format.usage_bits = RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT | RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT
+	texture_3D_format.usage_bits = RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT | RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT | RenderingDevice.TEXTURE_USAGE_COLOR_ATTACHMENT_BIT
 	
 	var texture3D_view = RDTextureView.new()
 	
-	var data : PackedByteArray = []
+	texture_3D = rd.texture_create(texture_3D_format, texture3D_view, [])
 	
-	for image in image_3D.get_data():
-		data.append_array(image.get_data())
+	texture_uniform.binding = 0
 	
-	image_3D_tex = rd.texture_create(texture3D_format, texture3D_view, [data])
+	texture_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
 	
-	image_uniform.binding = 0
+	texture_uniform.add_id(texture_3D)
 	
-	image_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
-	
-	image_uniform.add_id(image_3D_tex)
-	
-	
-	
-	var uniform_set = rd.uniform_set_create([image_uniform], shader, 0)
-	
-	var texture_3D_rd = Texture3DRD.new()
-	
-	texture_3D_rd = texture_3D.get_rid()
+	var uniform_set = rd.uniform_set_create([texture_uniform], shader, 0)
 	
 	# Start compute list to start recording our compute commands
 	var compute_list = rd.compute_list_begin()
@@ -107,6 +82,14 @@ func _ready():
 	rd.submit()
 	# Force the CPU to wait for the GPU to finish with the recorded commands
 	rd.sync()
+	
+	var texture_3D_RD : Texture3DRD = Texture3DRD.new()
+	texture_3D_RD.set_deferred("texture_rd_rid", texture_3D)
+	
+	for paintable in get_tree().get_nodes_in_group("paintable_element"):
+		paintable.get_surface_override_material(0).set_shader_parameter("map_size", map_size)
+		paintable.get_surface_override_material(0).set_shader_parameter("map_extents", map_extents)
+		paintable.get_surface_override_material(0).set_shader_parameter("world_paint_texture", texture_3D_RD)
 
 func paint(in_position : Vector3):
 	print("in position: ", in_position)
@@ -122,7 +105,7 @@ func paint(in_position : Vector3):
 				position = truncated_position + offset
 				images[position.z].set_pixelv(Vector2i(position.x, position.y), Color(1, 1, 1, 1))
 	
-	image_3D.update(images)
+	#image_3D.update(images)
 
 func erase(in_position : Vector3):
 	print("in position: ", in_position)
@@ -135,4 +118,4 @@ func erase(in_position : Vector3):
 				position = truncated_position + Vector3i(i - brush_radius, j - brush_radius, k - brush_radius)
 				images[position.z].set_pixelv(Vector2i(position.x, position.y), Color(0, 0, 0, 0))
 	
-	image_3D.update(images)
+	#image_3D.update(images)
