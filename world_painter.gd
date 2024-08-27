@@ -5,7 +5,9 @@ class_name WorldPainter
 
 @export var map_extents : Vector3 = Vector3(50, 50, 50)
 
-@export var brush_radius : float = 5
+@export var brush_radius : float = 50
+
+@export var paint_texture : Texture2D
 
 var texture_3D_rd : Texture3DRD 
 
@@ -51,7 +53,7 @@ func initialize_compute():
 	
 	texture_3D_format.texture_type = RenderingDevice.TEXTURE_TYPE_3D
 	
-	texture_3D_format.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT
+	texture_3D_format.format = RenderingDevice.DATA_FORMAT_R32G32B32A32_SFLOAT
 	
 	texture_3D_format.usage_bits = RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT | RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT | RenderingDevice.TEXTURE_USAGE_COLOR_ATTACHMENT_BIT
 	
@@ -67,20 +69,56 @@ func initialize_compute():
 	
 	texture_uniform.add_id(texture_3D)
 	
-	uniform_set = rd.uniform_set_create([texture_uniform], shader, 0)
+	var sampler_state := RDSamplerState.new()
+	
+	sampler_state.min_filter = RenderingDevice.SAMPLER_FILTER_LINEAR
+	sampler_state.mag_filter = RenderingDevice.SAMPLER_FILTER_LINEAR
+	sampler_state.repeat_u = RenderingDevice.SAMPLER_REPEAT_MODE_CLAMP_TO_EDGE
+	sampler_state.repeat_v = RenderingDevice.SAMPLER_REPEAT_MODE_CLAMP_TO_EDGE
+	
+	var linear_sampler : RID = rd.sampler_create(sampler_state)
+	
+	var paint_image : Image = Image.new()
+	paint_image.copy_from(paint_texture.get_image())
+	paint_image.decompress()
+	paint_image.convert(Image.FORMAT_RGBAF)
+	paint_image.clear_mipmaps()
+	
+	var paint_texture_format : RDTextureFormat = RDTextureFormat.new()
+	paint_texture_format.width = paint_image.get_width()
+	paint_texture_format.height = paint_image.get_height()
+	paint_texture_format.depth = 1
+	
+	paint_texture_format.texture_type = RenderingDevice.TEXTURE_TYPE_2D
+	
+	paint_texture_format.format = RenderingDevice.DATA_FORMAT_R32G32B32A32_SFLOAT
+	
+	paint_texture_format.usage_bits = RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_STORAGE_BIT
+	
+	var paint_texture_view : RDTextureView = RDTextureView.new()
+	
+	var paint_texture_rd = rd.texture_create(paint_texture_format, paint_texture_view, [paint_image.get_data()])
+	
+	var paint_texture_uniform = RDUniform.new()
+	paint_texture_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
+	paint_texture_uniform.binding = 1
+	paint_texture_uniform.add_id(linear_sampler)
+	paint_texture_uniform.add_id(paint_texture_rd)
+	
+	uniform_set = rd.uniform_set_create([texture_uniform, paint_texture_uniform], shader, 0)
 	
 	compute_size = (Vector3i(brush_radius, brush_radius, brush_radius) * 2 - Vector3i(1, 1, 1)) / 8 + Vector3i(1, 1, 1)
 	
 	texture_3D_rd = Texture3DRD.new()
 	texture_3D_rd.texture_rd_rid = texture_3D
 
-func paint(in_position : Vector3):
-	RenderingServer.call_on_render_thread(render_paint.bind(in_position))
+func paint(in_position : Vector3, in_normal : Vector3):
+	RenderingServer.call_on_render_thread(render_paint.bind(in_position, in_normal))
 
-func erase(in_position : Vector3):
-	RenderingServer.call_on_render_thread(render_erase.bind(in_position))
+func erase(in_position : Vector3, in_normal : Vector3):
+	RenderingServer.call_on_render_thread(render_erase.bind(in_position, in_normal))
 
-func render_paint(in_position : Vector3):
+func render_paint(in_position : Vector3, in_normal : Vector3):
 	# Start compute list to start recording our compute commands
 	compute_list = rd.compute_list_begin()
 	# Bind the pipeline, this tells the GPU what shader to use
@@ -96,6 +134,10 @@ func render_paint(in_position : Vector3):
 		truncated_position.y,
 		truncated_position.z,
 		1,
+		in_normal.x,
+		in_normal.y,
+		in_normal.z,
+		0,
 	]
 	
 	var int_push_constants : PackedInt32Array = [
@@ -121,7 +163,7 @@ func render_paint(in_position : Vector3):
 	rd.sync()
 
 
-func render_erase(in_position : Vector3):
+func render_erase(in_position : Vector3, in_normal : Vector3):
 	# Start compute list to start recording our compute commands
 	compute_list = rd.compute_list_begin()
 	# Bind the pipeline, this tells the GPU what shader to use
@@ -136,7 +178,11 @@ func render_erase(in_position : Vector3):
 		truncated_position.x,
 		truncated_position.y,
 		truncated_position.z,
-		1,
+		-1,
+		in_normal.x,
+		in_normal.y,
+		in_normal.z,
+		0,
 	]
 	
 	var int_push_constants : PackedInt32Array = [

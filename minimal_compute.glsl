@@ -2,12 +2,15 @@
 
 #version 450
 
-layout(set = 0, binding = 0, r32f) uniform image3D image;
+layout(set = 0, binding = 0, rgba32f) uniform image3D image;
+layout(set = 0, binding = 1) uniform sampler2D paint_texture;
 
 layout(push_constant, std430) uniform Params 
 {	
-	vec3 position;
+	vec3 position;	
 	float color_value;
+	vec3 normal;
+	float nan4;
 	int brush_radius;
 	int nan1;
 	int nan2;
@@ -34,5 +37,7 @@ void main() {
 		return;
 	}
 
-	imageStore(image, current_coordinate, vec4(params.color_value, 1, 1, 1));
+	vec4 texture_sample = textureLod(paint_texture, vec2(float(invocation_id.xz) / (params.brush_radius) * 2), 0.0);
+
+	imageStore(image, current_coordinate, vec4(texture_sample.xyz, clamp(imageLoad(image, current_coordinate).a + texture_sample.a * params.color_value * 0.1 * smoothstep(params.brush_radius, 0, offset_length), 0, 1)));
 }

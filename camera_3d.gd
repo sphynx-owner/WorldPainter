@@ -7,12 +7,17 @@ extends Camera3D
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		global_rotation += Vector3(rad_to_deg(-event.relative.y), rad_to_deg(-event.relative.x), 0) / 10000
+		if Input.is_action_pressed("LeftClick"):
+			world_painter.paint(raycast.get_collision_point(), raycast.get_collision_normal())
+		
+		if Input.is_action_pressed("RightClick"):
+			world_painter.erase(raycast.get_collision_point(), raycast.get_collision_normal())
 	
 	if Input.is_action_just_pressed("LeftClick"):
-		world_painter.paint(raycast.get_collision_point())
+		world_painter.paint(raycast.get_collision_point(), raycast.get_collision_normal())
 	
 	if Input.is_action_just_pressed("RightClick"):
-		world_painter.erase(raycast.get_collision_point())
+		world_painter.erase(raycast.get_collision_point(), raycast.get_collision_normal())
 
 func _ready():
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
