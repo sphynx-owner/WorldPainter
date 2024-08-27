@@ -1,7 +1,7 @@
 extends Node
 class_name WorldPainter
 
-@export var map_size : Vector3i = Vector3i(100, 100, 100)
+@export var map_size : Vector3i = Vector3i(800, 800, 800)
 
 @export var map_extents : Vector3 = Vector3(50, 50, 50)
 
@@ -98,7 +98,7 @@ func render_paint(in_position : Vector3):
 		1,
 	]
 	
-	var int_push_constants : PackedFloat32Array = [
+	var int_push_constants : PackedInt32Array = [
 		brush_radius,
 		0,
 		0,
@@ -139,7 +139,7 @@ func render_erase(in_position : Vector3):
 		1,
 	]
 	
-	var int_push_constants : PackedFloat32Array = [
+	var int_push_constants : PackedInt32Array = [
 		brush_radius,
 		0,
 		0,
