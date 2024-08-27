@@ -69,7 +69,7 @@ func initialize_compute():
 	
 	uniform_set = rd.uniform_set_create([texture_uniform], shader, 0)
 	
-	compute_size = (map_size - Vector3i(1, 1, 1)) / 8 + Vector3i(1, 1, 1)
+	compute_size = (Vector3i(brush_radius, brush_radius, brush_radius) * 2 - Vector3i(1, 1, 1)) / 8 + Vector3i(1, 1, 1)
 	
 	texture_3D_rd = Texture3DRD.new()
 	texture_3D_rd.texture_rd_rid = texture_3D
@@ -89,14 +89,25 @@ func render_paint(in_position : Vector3):
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set, 0)
 	# Dispatch 1x1x1 (XxYxZ) work groups
 	
+	var truncated_position : Vector3i = clamp(Vector3i((in_position + map_extents / 2) * Vector3(map_size) / map_extents), Vector3i(brush_radius, brush_radius, brush_radius), Vector3i(map_size.x - brush_radius, map_size.y - brush_radius, map_size.z - brush_radius))
+	
 	var push_constants : PackedFloat32Array = [
-		in_position.x,
-		in_position.y,
-		in_position.z,
+		truncated_position.x,
+		truncated_position.y,
+		truncated_position.z,
+		1,
+	]
+	
+	var int_push_constants : PackedFloat32Array = [
+		brush_radius,
+		0,
+		0,
 		0,
 	]
 	
 	var byte_push_constants = push_constants.to_byte_array()
+	
+	byte_push_constants.append_array(int_push_constants.to_byte_array())
 	
 	rd.compute_list_set_push_constant(compute_list, byte_push_constants, byte_push_constants.size())
 	
@@ -119,14 +130,25 @@ func render_erase(in_position : Vector3):
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set, 0)
 	# Dispatch 1x1x1 (XxYxZ) work groups
 	
+	var truncated_position : Vector3i = clamp(Vector3i((in_position + map_extents / 2) * Vector3(map_size) / map_extents), Vector3i(brush_radius, brush_radius, brush_radius), Vector3i(map_size.x - brush_radius, map_size.y - brush_radius, map_size.z - brush_radius))
+	
 	var push_constants : PackedFloat32Array = [
-		in_position.x,
-		in_position.y,
-		in_position.z,
+		truncated_position.x,
+		truncated_position.y,
+		truncated_position.z,
+		1,
+	]
+	
+	var int_push_constants : PackedFloat32Array = [
+		brush_radius,
+		0,
+		0,
 		0,
 	]
 	
 	var byte_push_constants = push_constants.to_byte_array()
+	
+	byte_push_constants.append_array(int_push_constants.to_byte_array())
 	
 	rd.compute_list_set_push_constant(compute_list, byte_push_constants, byte_push_constants.size())
 	
