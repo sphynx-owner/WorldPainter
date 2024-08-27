@@ -9,11 +9,24 @@ class_name WorldPainter
 
 var texture_3D_rd : Texture3DRD 
 
+var texture_3D : RID
+
+var texture_uniform : RDUniform
+
+var texture3D_view : RDTextureView
+
+var compute_list : int
+
+var compute_size : Vector3i 
+
+var uniform_set : RID
+
 var rd : RenderingDevice = null
 var shader_file : RDShaderFile
 var shader_bytecode
 var shader
 var pipeline
+
 func _ready():
 	RenderingServer.call_on_render_thread(initialize_compute)
 	for paintable in get_tree().get_nodes_in_group("paintable_element"):
@@ -42,13 +55,11 @@ func initialize_compute():
 	
 	texture_3D_format.usage_bits = RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT | RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT | RenderingDevice.TEXTURE_USAGE_COLOR_ATTACHMENT_BIT
 	
-	var texture3D_view = RDTextureView.new()
-	
-	var texture_3D : RID
+	texture3D_view = RDTextureView.new()
 	
 	texture_3D = rd.texture_create(texture_3D_format, texture3D_view, [])
 	
-	var texture_uniform = RDUniform.new()
+	texture_uniform = RDUniform.new()
 	
 	texture_uniform.binding = 0
 	
@@ -56,34 +67,40 @@ func initialize_compute():
 	
 	texture_uniform.add_id(texture_3D)
 	
-	var uniform_set = rd.uniform_set_create([texture_uniform], shader, 0)
+	uniform_set = rd.uniform_set_create([texture_uniform], shader, 0)
 	
+	compute_size = (map_size - Vector3i(1, 1, 1)) / 8 + Vector3i(1, 1, 1)
+	
+	texture_3D_rd = Texture3DRD.new()
+	texture_3D_rd.texture_rd_rid = texture_3D
+
+func paint(in_position : Vector3):
+	RenderingServer.call_on_render_thread(render_paint.bind(in_position))
+
+func erase(in_position : Vector3):
+	RenderingServer.call_on_render_thread(render_erase.bind(in_position))
+
+func render_paint(in_position : Vector3):
 	# Start compute list to start recording our compute commands
-	var compute_list = rd.compute_list_begin()
+	compute_list = rd.compute_list_begin()
 	# Bind the pipeline, this tells the GPU what shader to use
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline)
 	# Binds the uniform set with the data we want to give our shader
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set, 0)
 	# Dispatch 1x1x1 (XxYxZ) work groups
 	
-	var position : Vector3
-	
 	var push_constants : PackedFloat32Array = [
-		position.x,
-		position.y,
-		position.z,
+		in_position.x,
+		in_position.y,
+		in_position.z,
 		0,
 	]
 	
 	var byte_push_constants = push_constants.to_byte_array()
 	
-	var size_x = (map_size.x - 1) / 8 + 1
-	var size_y = (map_size.y - 1) / 8 + 1
-	var size_z = (map_size.z - 1) / 8 + 1
-	
 	rd.compute_list_set_push_constant(compute_list, byte_push_constants, byte_push_constants.size())
 	
-	rd.compute_list_dispatch(compute_list, size_x, size_y, size_z)
+	rd.compute_list_dispatch(compute_list, compute_size.x, compute_size.y, compute_size.z)
 	#rd.compute_list_add_barrier(compute_list)
 	# Tell the GPU we are done with this compute task
 	rd.compute_list_end()
@@ -91,20 +108,33 @@ func initialize_compute():
 	rd.submit()
 	# Force the CPU to wait for the GPU to finish with the recorded commands
 	rd.sync()
-	
-	texture_3D_rd = Texture3DRD.new()
-	texture_3D_rd.texture_rd_rid = texture_3D
 
-func paint(in_position : Vector3):
-	print("in position: ", in_position)
-	var position : Vector3i
-	var truncated_position : Vector3i = clamp(Vector3i((in_position + map_extents / 2) * Vector3(map_size) / map_extents), Vector3i(brush_radius, brush_radius, brush_radius), Vector3i(map_size.x - brush_radius, map_size.y - brush_radius, map_size.z - brush_radius))
-	print("truncated position: ", truncated_position)
-	
 
-func erase(in_position : Vector3):
-	print("in position: ", in_position)
-	var position : Vector3i
-	var truncated_position : Vector3i = clamp(Vector3i((in_position + map_extents / 2) * Vector3(map_size) / map_extents), Vector3i(brush_radius, brush_radius, brush_radius), Vector3i(map_size.x - brush_radius, map_size.y - brush_radius, map_size.x - brush_radius))
-	print("truncated position: ", truncated_position)
+func render_erase(in_position : Vector3):
+	# Start compute list to start recording our compute commands
+	compute_list = rd.compute_list_begin()
+	# Bind the pipeline, this tells the GPU what shader to use
+	rd.compute_list_bind_compute_pipeline(compute_list, pipeline)
+	# Binds the uniform set with the data we want to give our shader
+	rd.compute_list_bind_uniform_set(compute_list, uniform_set, 0)
+	# Dispatch 1x1x1 (XxYxZ) work groups
 	
+	var push_constants : PackedFloat32Array = [
+		in_position.x,
+		in_position.y,
+		in_position.z,
+		0,
+	]
+	
+	var byte_push_constants = push_constants.to_byte_array()
+	
+	rd.compute_list_set_push_constant(compute_list, byte_push_constants, byte_push_constants.size())
+	
+	rd.compute_list_dispatch(compute_list, compute_size.x, compute_size.y, compute_size.z)
+	#rd.compute_list_add_barrier(compute_list)
+	# Tell the GPU we are done with this compute task
+	rd.compute_list_end()
+	# Force the GPU to start our commands
+	rd.submit()
+	# Force the CPU to wait for the GPU to finish with the recorded commands
+	rd.sync()

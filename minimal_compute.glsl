@@ -20,5 +20,5 @@ void main() {
 		return;
 	}
 
-	imageStore(image, current_pixel, vec4(0, 0, 0, 0));
+	imageStore(image, current_pixel, vec4(1, 1, 1, 1));
 }
