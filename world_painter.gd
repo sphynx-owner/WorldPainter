@@ -7,18 +7,23 @@ class_name WorldPainter
 
 @export var brush_radius : float = 5
 
-@onready var images : Array[Image] = []
+var texture_3D_rd : Texture3DRD 
 
-var texture_3D : RID 
-@onready var texture_uniform = RDUniform.new()
 var rd : RenderingDevice = null
 var shader_file : RDShaderFile
 var shader_bytecode
 var shader
 var pipeline
 func _ready():
+	RenderingServer.call_on_render_thread(initialize_compute)
+	for paintable in get_tree().get_nodes_in_group("paintable_element"):
+		paintable.get_surface_override_material(0).set_shader_parameter("map_size", map_size)
+		paintable.get_surface_override_material(0).set_shader_parameter("map_extents", map_extents)
+		paintable.get_surface_override_material(0).set_shader_parameter.call_deferred("world_paint_texture", texture_3D_rd)
+
+func initialize_compute():
 	# We will be using our own RenderingDevice to handle the compute commands
-	rd = RenderingServer.create_local_rendering_device()
+	rd = RenderingServer.get_rendering_device()
 	
 	# Create shader and pipeline
 	shader_file = load("res://minimal_compute.glsl")
@@ -39,7 +44,11 @@ func _ready():
 	
 	var texture3D_view = RDTextureView.new()
 	
+	var texture_3D : RID
+	
 	texture_3D = rd.texture_create(texture_3D_format, texture3D_view, [])
+	
+	var texture_uniform = RDUniform.new()
 	
 	texture_uniform.binding = 0
 	
@@ -83,39 +92,19 @@ func _ready():
 	# Force the CPU to wait for the GPU to finish with the recorded commands
 	rd.sync()
 	
-	var texture_3D_RD : Texture3DRD = Texture3DRD.new()
-	texture_3D_RD.set_deferred("texture_rd_rid", texture_3D)
-	
-	for paintable in get_tree().get_nodes_in_group("paintable_element"):
-		paintable.get_surface_override_material(0).set_shader_parameter("map_size", map_size)
-		paintable.get_surface_override_material(0).set_shader_parameter("map_extents", map_extents)
-		paintable.get_surface_override_material(0).set_shader_parameter("world_paint_texture", texture_3D_RD)
+	texture_3D_rd = Texture3DRD.new()
+	texture_3D_rd.texture_rd_rid = texture_3D
 
 func paint(in_position : Vector3):
 	print("in position: ", in_position)
 	var position : Vector3i
 	var truncated_position : Vector3i = clamp(Vector3i((in_position + map_extents / 2) * Vector3(map_size) / map_extents), Vector3i(brush_radius, brush_radius, brush_radius), Vector3i(map_size.x - brush_radius, map_size.y - brush_radius, map_size.z - brush_radius))
 	print("truncated position: ", truncated_position)
-	for i in brush_radius * 2:
-		for j in brush_radius * 2:
-			for k in brush_radius * 2:
-				var offset = Vector3i(i - brush_radius, j - brush_radius, k - brush_radius)
-				if offset.length() > brush_radius:
-					continue
-				position = truncated_position + offset
-				images[position.z].set_pixelv(Vector2i(position.x, position.y), Color(1, 1, 1, 1))
 	
-	#image_3D.update(images)
 
 func erase(in_position : Vector3):
 	print("in position: ", in_position)
 	var position : Vector3i
 	var truncated_position : Vector3i = clamp(Vector3i((in_position + map_extents / 2) * Vector3(map_size) / map_extents), Vector3i(brush_radius, brush_radius, brush_radius), Vector3i(map_size.x - brush_radius, map_size.y - brush_radius, map_size.x - brush_radius))
 	print("truncated position: ", truncated_position)
-	for i in brush_radius * 2:
-		for j in brush_radius * 2:
-			for k in brush_radius * 2:
-				position = truncated_position + Vector3i(i - brush_radius, j - brush_radius, k - brush_radius)
-				images[position.z].set_pixelv(Vector2i(position.x, position.y), Color(0, 0, 0, 0))
 	
-	#image_3D.update(images)
