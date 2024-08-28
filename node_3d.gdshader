@@ -50,39 +50,39 @@ void vertex() {
 
 void fragment() {
 	vec2 base_uv = UV;
-	
+
 	vec4 world_position = INV_VIEW_MATRIX * INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2. - 1., FRAGCOORD.z, 1.);
 	world_position.xyz /= world_position.w;
-	
+
 	vec4 back_world_position = INV_VIEW_MATRIX * INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2. - 1., texture(depth_texture, SCREEN_UV).x, 1.);
 	back_world_position.xyz /= back_world_position.w;
-	
+
 	float background_distance = length(back_world_position.xyz - world_position.xyz);
-	
+
 	vec3 ray = world_position.xyz - CAMERA_POSITION_WORLD;
-	
+
 	float ray_length = length(ray);
-	
+
 	vec3 wray = ray / ray_length;
-	
+
 	vec3 ray_normal_cross = cross(wray, world_normal);
-	
+
 	float rnc_length = length(ray_normal_cross);
-	
+
 	vec3 wrnc = ray_normal_cross / rnc_length;
-	
+
 	float angle = asin(sin(pow(rnc_length, 10)) * refraction_index);
-	
+
 	vec3 rotated_ray = rotate(angle, wrnc, wray);
-	
+
 	vec4 new_clip = PROJECTION_MATRIX * VIEW_MATRIX * vec4(world_position.xyz + rotated_ray * background_distance, 1.0);
-	
+
 	vec3 new_ndc = new_clip.xyz / new_clip.w;
-	
+
 	vec2 new_screen_uv = new_ndc.xy / 2. + 0.5;
-	
+
 	vec4 albedo_tex = texture(screen_texture, new_screen_uv);
-	
+
 	ALBEDO = albedo.rgb * albedo_tex.rgb;
 
 	float metallic_tex = dot(texture(texture_metallic, base_uv), metallic_texture_channel);

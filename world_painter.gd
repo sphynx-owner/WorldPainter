@@ -73,16 +73,15 @@ func initialize_compute():
 	
 	sampler_state.min_filter = RenderingDevice.SAMPLER_FILTER_LINEAR
 	sampler_state.mag_filter = RenderingDevice.SAMPLER_FILTER_LINEAR
-	sampler_state.repeat_u = RenderingDevice.SAMPLER_REPEAT_MODE_CLAMP_TO_EDGE
-	sampler_state.repeat_v = RenderingDevice.SAMPLER_REPEAT_MODE_CLAMP_TO_EDGE
+	sampler_state.repeat_u = RenderingDevice.SAMPLER_REPEAT_MODE_REPEAT
+	sampler_state.repeat_v = RenderingDevice.SAMPLER_REPEAT_MODE_REPEAT
 	
 	var linear_sampler : RID = rd.sampler_create(sampler_state)
 	
-	var paint_image : Image = Image.new()
-	paint_image.copy_from(paint_texture.get_image())
+	var paint_image : Image = paint_texture.get_image()
+	paint_image.clear_mipmaps()
 	paint_image.decompress()
 	paint_image.convert(Image.FORMAT_RGBAF)
-	paint_image.clear_mipmaps()
 	
 	var paint_texture_format : RDTextureFormat = RDTextureFormat.new()
 	paint_texture_format.width = paint_image.get_width()
@@ -112,13 +111,13 @@ func initialize_compute():
 	texture_3D_rd = Texture3DRD.new()
 	texture_3D_rd.texture_rd_rid = texture_3D
 
-func paint(in_position : Vector3, in_normal : Vector3):
-	RenderingServer.call_on_render_thread(render_paint.bind(in_position, in_normal))
+func paint(in_position : Vector3, in_basis : Basis):
+	RenderingServer.call_on_render_thread(render_paint.bind(in_position, in_basis))
 
-func erase(in_position : Vector3, in_normal : Vector3):
-	RenderingServer.call_on_render_thread(render_erase.bind(in_position, in_normal))
+func erase(in_position : Vector3, in_basis : Basis):
+	RenderingServer.call_on_render_thread(render_erase.bind(in_position, in_basis))
 
-func render_paint(in_position : Vector3, in_normal : Vector3):
+func render_paint(in_position : Vector3, in_basis : Basis):
 	# Start compute list to start recording our compute commands
 	compute_list = rd.compute_list_begin()
 	# Bind the pipeline, this tells the GPU what shader to use
@@ -134,9 +133,21 @@ func render_paint(in_position : Vector3, in_normal : Vector3):
 		truncated_position.y,
 		truncated_position.z,
 		1,
-		in_normal.x,
-		in_normal.y,
-		in_normal.z,
+		in_basis.x.x,
+		in_basis.x.y,
+		in_basis.x.z,
+		0,
+		in_basis.y.x,
+		in_basis.y.y,
+		in_basis.y.z,
+		0,
+		in_basis.z.x,
+		in_basis.z.y,
+		in_basis.z.z,
+		0,
+		0,
+		0,
+		0,
 		0,
 	]
 	
@@ -163,7 +174,7 @@ func render_paint(in_position : Vector3, in_normal : Vector3):
 	rd.sync()
 
 
-func render_erase(in_position : Vector3, in_normal : Vector3):
+func render_erase(in_position : Vector3, in_basis : Basis):
 	# Start compute list to start recording our compute commands
 	compute_list = rd.compute_list_begin()
 	# Bind the pipeline, this tells the GPU what shader to use
@@ -179,9 +190,9 @@ func render_erase(in_position : Vector3, in_normal : Vector3):
 		truncated_position.y,
 		truncated_position.z,
 		-1,
-		in_normal.x,
-		in_normal.y,
-		in_normal.z,
+		in_basis.x,
+		in_basis.y,
+		in_basis.z,
 		0,
 	]
 	

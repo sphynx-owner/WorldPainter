@@ -31,9 +31,9 @@ void fragment() {
 	world_position.xyz /= world_position.w;
 
 	vec3 truncated_world_position = vec3((world_position.xyz + map_extents / 2.) / map_extents);
-	
+
 	vec4 paint_texture_sample = texture(world_paint_texture, truncated_world_position);
-	
+
 	ALBEDO = mix(vec3(.5, .5, .5), paint_texture_sample.xyz, paint_texture_sample.a);
 
 	float metallic_tex = dot(texture(texture_metallic, base_uv), metallic_texture_channel);

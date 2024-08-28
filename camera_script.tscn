@@ -192,6 +192,16 @@ surface_material_override/0 = SubResource("ShaderMaterial_tyc0d")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D7/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_pnw0f")
 
+[node name="MeshInstance3D9" type="MeshInstance3D" parent="." groups=["paintable_element"]]
+transform = Transform3D(11.85, 0, 0, 0, 10.63, 0, 0, 0, 20.075, 16.5796, 0, 0)
+mesh = SubResource("BoxMesh_8xnkm")
+surface_material_override/0 = SubResource("ShaderMaterial_tyc0d")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D9"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D9/StaticBody3D"]
+shape = SubResource("ConcavePolygonShape3D_pnw0f")
+
 [node name="MeshInstance3D8" type="MeshInstance3D" parent="." groups=["paintable_element"]]
 transform = Transform3D(7.43028, 0, 0.850015, 0, 10.7755, 0, -27.7302, 0, 0.227761, 0, -0.845324, -0.787615)
 mesh = SubResource("BoxMesh_8xnkm")
