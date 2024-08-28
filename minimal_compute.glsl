@@ -47,7 +47,7 @@ void main() {
 
 	vec3 local_sample_offset = invocation_id;
 
-	local_sample_offset = (inverse(params.surface_matrix) * vec4(local_sample_offset, 1.0)).xyz;
+	local_sample_offset = (transpose(params.surface_matrix) * vec4(local_sample_offset, 1.0)).xyz;
 
 	vec2 texture_uv = vec2(local_sample_offset.xy) / float(params.brush_radius * 2);
 

@@ -252,14 +252,18 @@ surface_material_override/0 = SubResource("ShaderMaterial_3gikc")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D6/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_pnw0f")
 
-[node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("world_painter", "raycast")]
+[node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("world_painter", "raycast", "draw_timer")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.000303745, 0.43046, 1.98705)
 script = ExtResource("1_wgonw")
 world_painter = NodePath("../WorldPainter")
 raycast = NodePath("RayCast3D")
+draw_timer = NodePath("Timer")
 
 [node name="RayCast3D" type="RayCast3D" parent="Camera3D"]
 target_position = Vector3(0, 0, -100)
+
+[node name="Timer" type="Timer" parent="Camera3D"]
+wait_time = 0.1
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_fmhb4")
