@@ -1,9 +1,10 @@
-[gd_scene load_steps=20 format=3 uid="uid://cos7vsxw5wgwr"]
+[gd_scene load_steps=25 format=3 uid="uid://cos7vsxw5wgwr"]
 
 [ext_resource type="Shader" path="res://paintable_element.gdshader" id="1_3y42g"]
 [ext_resource type="Script" path="res://camera_3d.gd" id="1_wgonw"]
 [ext_resource type="Script" path="res://world_painter.gd" id="2_rbxql"]
 [ext_resource type="Texture2D" uid="uid://pf6gcvcphwgi" path="res://icon.svg" id="4_lxlxt"]
+[ext_resource type="Shader" path="res://basis_debug.gdshader" id="5_j4pth"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_8xnkm"]
 
@@ -101,6 +102,8 @@ shader_parameter/uv2_offset = null
 shader_parameter/map_size = null
 shader_parameter/map_extents = null
 
+[sub_resource type="CylinderMesh" id="CylinderMesh_qm0tb"]
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_426k7"]
 resource_local_to_scene = true
 render_priority = 0
@@ -117,6 +120,8 @@ shader_parameter/uv2_scale = null
 shader_parameter/uv2_offset = null
 shader_parameter/map_size = null
 shader_parameter/map_extents = null
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_0k78w"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_b286m"]
 resource_local_to_scene = true
@@ -151,6 +156,12 @@ shader_parameter/uv2_scale = null
 shader_parameter/uv2_offset = null
 shader_parameter/map_size = null
 shader_parameter/map_extents = null
+
+[sub_resource type="SphereMesh" id="SphereMesh_5u1q8"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bqdvh"]
+render_priority = 0
+shader = ExtResource("5_j4pth")
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_q32dd"]
 
@@ -223,14 +234,14 @@ surface_material_override/0 = SubResource("ShaderMaterial_3log1")
 shape = SubResource("ConcavePolygonShape3D_pnw0f")
 
 [node name="MeshInstance3D4" type="MeshInstance3D" parent="." groups=["paintable_element"]]
-transform = Transform3D(1.00882, 0, 0, 0, 30.668, 0, 0, 0, 1.00882, -1.4364, -0.845324, 0.863546)
-mesh = SubResource("BoxMesh_8xnkm")
+transform = Transform3D(6.359, 0, 0, 0, 21.027, 0, 0, 0, 6.359, -1.4364, -0.845324, 0.863546)
+mesh = SubResource("CylinderMesh_qm0tb")
 surface_material_override/0 = SubResource("ShaderMaterial_426k7")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D4"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D4/StaticBody3D"]
-shape = SubResource("ConcavePolygonShape3D_pnw0f")
+shape = SubResource("CylinderShape3D_0k78w")
 
 [node name="MeshInstance3D5" type="MeshInstance3D" parent="." groups=["paintable_element"]]
 transform = Transform3D(1, 0, 0, 0, 5.98673, 0.587785, 0, -4.34961, 0.809017, 2.84276, -0.845324, 2.61316)
@@ -252,18 +263,24 @@ surface_material_override/0 = SubResource("ShaderMaterial_3gikc")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D6/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_pnw0f")
 
-[node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("world_painter", "raycast", "draw_timer")]
+[node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("world_painter", "raycast", "draw_timer", "basis_debug_mesh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.000303745, 0.43046, 1.98705)
 script = ExtResource("1_wgonw")
 world_painter = NodePath("../WorldPainter")
 raycast = NodePath("RayCast3D")
 draw_timer = NodePath("Timer")
+basis_debug_mesh = NodePath("../MeshInstance3D10")
 
 [node name="RayCast3D" type="RayCast3D" parent="Camera3D"]
 target_position = Vector3(0, 0, -100)
 
 [node name="Timer" type="Timer" parent="Camera3D"]
 wait_time = 0.1
+
+[node name="MeshInstance3D10" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.769032, 0, -0.639211, 0, 1, 0, 0.639211, 0, 0.769032, 6.17941, 0, 8.07014)
+mesh = SubResource("SphereMesh_5u1q8")
+surface_material_override/0 = SubResource("ShaderMaterial_bqdvh")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_fmhb4")

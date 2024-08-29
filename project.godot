@@ -14,6 +14,10 @@ config/name="WhateverProject"
 config/features=PackedStringArray("4.3", "Forward Plus")
 config/icon="res://icon.svg"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/SphynxWorldPainter/plugin.cfg")
+
 [input]
 
 W={

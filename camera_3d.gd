@@ -6,10 +6,12 @@ extends Camera3D
 
 @export var draw_timer : Timer
 
+@export var basis_debug_mesh : MeshInstance3D
+
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		global_rotation += Vector3(rad_to_deg(-event.relative.y), rad_to_deg(-event.relative.x), 0) / 10000
-		draw_process()
+		#draw_process()
 	
 	if Input.is_action_just_pressed("LeftClick"):
 		world_painter.paint(raycast.get_collision_point(), normal_to_basis(raycast.get_collision_normal()))
@@ -29,8 +31,9 @@ func _process(delta: float) -> void:
 	
 	global_position += global_basis * movement_3D_input
 	
-	if movement_3D_input.length() > 0:
-		draw_process()
+	draw_process()
+	#if movement_3D_input.length() > 0:
+		#draw_process()
 
 var can_draw : bool = true
 
@@ -53,8 +56,10 @@ func draw_process():
 func normal_to_basis(normal : Vector3) -> Basis:
 	var result_basis : Basis
 	var z : Vector3 = normal
-	var y : Vector3 = Vector3(0, 1, 0) if normal != Vector3(0, 1, 0) else Vector3(1, 0, 0)
-	var x : Vector3 = y.cross(z)
-	y = x.cross(z)
+	var y : Vector3 = Vector3(0, 1, 0) if !normal.is_equal_approx(Vector3(0, 1, 0)) else Vector3(0, 0, 1)
+	var x : Vector3 = z.cross(y) if !normal.is_equal_approx(Vector3(0, 1, 0)) else Vector3(1, 0, 0)
+	y = z.cross(x) if !normal.is_equal_approx(Vector3(0, 1, 0)) else y
 	result_basis = Basis(x.normalized(), y.normalized(), z.normalized())
+	basis_debug_mesh.global_basis = result_basis
+	basis_debug_mesh.global_position = raycast.get_collision_point() 
 	return result_basis

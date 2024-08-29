@@ -9,7 +9,7 @@ layout(push_constant, std430) uniform Params
 {	
 	vec3 position;	
 	float color_value;
-	mat4 surface_matrix;
+	mat3 surface_matrix;
 	int brush_radius;
 	int nan1;
 	int nan2;
@@ -40,18 +40,24 @@ void main() {
 
 	float offset_length = length(local_invocation_offset);
 
-	if(offset_length > params.brush_radius)
-	{
-		return;
-	}
+//	if(offset_length > params.brush_radius)
+//	{
+//		return;
+//	}
 
-	vec3 local_sample_offset = invocation_id;
+	vec3 local_sample_offset = local_invocation_offset;
 
-	local_sample_offset = (transpose(params.surface_matrix) * vec4(local_sample_offset, 1.0)).xyz;
+	local_sample_offset = params.surface_matrix * local_sample_offset + vec3(params.brush_radius);
 
 	vec2 texture_uv = vec2(local_sample_offset.xy) / float(params.brush_radius * 2);
 
-	vec4 texture_sample = textureLod(paint_texture, texture_uv, 0.0);
+	vec4 texture_sample = textureLod(paint_texture, texture_uv, 0.0);//vec4(abs(local_sample_offset), 1.0);//
+		
+	vec4 existing_color = imageLoad(image, current_coordinate);
 
-	imageStore(image, current_coordinate, vec4(texture_sample));//vec4(texture_sample.xyz, clamp(imageLoad(image, current_coordinate).a + texture_sample.a * params.color_value * 0.1 * smoothstep(params.brush_radius, 0, offset_length), 0, 1)));
+	float new_color_opacity = texture_sample.a * params.color_value * 1;// * smoothstep(params.brush_radius, 0, offset_length);
+
+	vec4 color_output = vec4(mix(existing_color.xyz, texture_sample.xyz, new_color_opacity), clamp(existing_color.a + new_color_opacity, 0, 1));
+
+	imageStore(image, current_coordinate, texture_sample);
 }
