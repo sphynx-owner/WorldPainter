@@ -128,8 +128,6 @@ func render_paint(in_position : Vector3, in_basis : Basis):
 	
 	var truncated_position : Vector3i = clamp(Vector3i((in_position + map_extents / 2) * Vector3(map_size) / map_extents), Vector3i(brush_radius, brush_radius, brush_radius), Vector3i(map_size.x - brush_radius, map_size.y - brush_radius, map_size.z - brush_radius))
 	
-	#in_basis = in_basis.orthonormalized()
-	
 	var push_constants : PackedFloat32Array = [
 		truncated_position.x,
 		truncated_position.y,
