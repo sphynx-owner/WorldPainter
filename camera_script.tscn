@@ -269,7 +269,7 @@ script = ExtResource("1_wgonw")
 world_painter = NodePath("../WorldPainter")
 raycast = NodePath("RayCast3D")
 draw_timer = NodePath("Timer")
-basis_debug_mesh = NodePath("../MeshInstance3D10")
+basis_debug_mesh = NodePath("../NormalBasisDebug")
 
 [node name="RayCast3D" type="RayCast3D" parent="Camera3D"]
 target_position = Vector3(0, 0, -100)
@@ -277,8 +277,9 @@ target_position = Vector3(0, 0, -100)
 [node name="Timer" type="Timer" parent="Camera3D"]
 wait_time = 0.1
 
-[node name="MeshInstance3D10" type="MeshInstance3D" parent="."]
+[node name="NormalBasisDebug" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.769032, 0, -0.639211, 0, 1, 0, 0.639211, 0, 0.769032, 6.17941, 0, 8.07014)
+visible = false
 mesh = SubResource("SphereMesh_5u1q8")
 surface_material_override/0 = SubResource("ShaderMaterial_bqdvh")
 

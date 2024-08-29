@@ -55,9 +55,9 @@ void main() {
 		
 	vec4 existing_color = imageLoad(image, current_coordinate);
 
-	float new_color_opacity = texture_sample.a * params.color_value * 1;// * smoothstep(params.brush_radius, 0, offset_length);
+	float new_color_opacity = texture_sample.a * params.color_value * 1 * smoothstep(params.brush_radius, 0, offset_length);
 
 	vec4 color_output = vec4(mix(existing_color.xyz, texture_sample.xyz, new_color_opacity), clamp(existing_color.a + new_color_opacity, 0, 1));
 
-	imageStore(image, current_coordinate, texture_sample);
+	imageStore(image, current_coordinate, color_output);
 }

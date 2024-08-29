@@ -17,6 +17,8 @@ var texture_uniform : RDUniform
 
 var texture3D_view : RDTextureView
 
+var depth_texture_rd : Texture2DRD
+
 var compute_list : int
 
 var compute_size : Vector3i 
