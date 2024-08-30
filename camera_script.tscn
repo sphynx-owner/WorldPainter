@@ -1,10 +1,11 @@
-[gd_scene load_steps=25 format=3 uid="uid://cos7vsxw5wgwr"]
+[gd_scene load_steps=28 format=3 uid="uid://cos7vsxw5wgwr"]
 
 [ext_resource type="Shader" path="res://paintable_element.gdshader" id="1_3y42g"]
 [ext_resource type="Script" path="res://camera_3d.gd" id="1_wgonw"]
 [ext_resource type="Script" path="res://world_painter.gd" id="2_rbxql"]
 [ext_resource type="Texture2D" uid="uid://pf6gcvcphwgi" path="res://icon.svg" id="4_lxlxt"]
 [ext_resource type="Shader" path="res://basis_debug.gdshader" id="5_j4pth"]
+[ext_resource type="Shader" path="res://volumetric_world_painter.gdshader" id="6_wsrrc"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_8xnkm"]
 
@@ -172,6 +173,13 @@ sky_material = SubResource("ProceduralSkyMaterial_q32dd")
 background_mode = 2
 sky = SubResource("Sky_277mh")
 
+[sub_resource type="BoxMesh" id="BoxMesh_rwjwj"]
+size = Vector3(40, 40, 40)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_p53oa"]
+render_priority = 0
+shader = ExtResource("6_wsrrc")
+
 [node name="Node3D" type="Node3D"]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." groups=["paintable_element"]]
@@ -289,3 +297,7 @@ environment = SubResource("Environment_fmhb4")
 [node name="WorldPainter" type="Node" parent="."]
 script = ExtResource("2_rbxql")
 paint_texture = ExtResource("4_lxlxt")
+
+[node name="MeshInstance3D10" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_rwjwj")
+surface_material_override/0 = SubResource("ShaderMaterial_p53oa")
