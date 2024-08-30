@@ -38,6 +38,7 @@ func _ready():
 	volume_mesh.get_surface_override_material(0).set_shader_parameter("map_size", map_size)
 	volume_mesh.get_surface_override_material(0).set_shader_parameter("map_extents", map_extents)
 	volume_mesh.get_surface_override_material(0).set_shader_parameter.call_deferred("world_paint_texture", texture_3D_rd)
+	volume_mesh.get_surface_override_material(0).next_pass.
 	volume_mesh.visible = true
 
 func initialize_compute():

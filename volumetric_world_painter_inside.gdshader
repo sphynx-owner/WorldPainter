@@ -1,6 +1,6 @@
 shader_type spatial;
 
-render_mode unshaded, cull_disabled;
+render_mode unshaded, cull_front;
 
 uniform sampler2D screen_texture : hint_screen_texture;
 uniform sampler2D depth_texture : hint_depth_texture;
@@ -27,7 +27,7 @@ void fragment() {
 	vec3 camera_fragment_offset = CAMERA_POSITION_WORLD - fragment_world_position.xyz;
 	float from_outside = step(0, dot(camera_fragment_offset, normal));
 	
-	float final_depth = FRAGCOORD.z;
+	float final_depth = mix(depth, FRAGCOORD.z, from_outside);
 	vec4 world_position = INV_VIEW_MATRIX * INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2. - 1., final_depth, 1.);
 	world_position.xyz /= world_position.w;
 

@@ -4,7 +4,7 @@
 [ext_resource type="Script" path="res://world_painter.gd" id="2_rbxql"]
 [ext_resource type="Texture2D" uid="uid://pf6gcvcphwgi" path="res://icon.svg" id="4_lxlxt"]
 [ext_resource type="Shader" path="res://basis_debug.gdshader" id="5_j4pth"]
-[ext_resource type="Shader" path="res://volumetric_world_painter.gdshader" id="6_wsrrc"]
+[ext_resource type="Shader" path="res://volumetric_world_painter_outside.gdshader" id="6_wsrrc"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_8xnkm"]
 
@@ -149,6 +149,9 @@ environment = SubResource("Environment_fmhb4")
 
 [node name="WorldPainter" type="Node" parent="." node_paths=PackedStringArray("volume_mesh")]
 script = ExtResource("2_rbxql")
+map_size = null
+map_extents = null
+brush_radius = null
 paint_texture = ExtResource("4_lxlxt")
 volume_mesh = NodePath("../VolumeMeshTest")
 
