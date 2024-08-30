@@ -9,6 +9,8 @@ class_name WorldPainter
 
 @export var paint_texture : Texture2D
 
+@export var volume_mesh : MeshInstance3D
+
 var texture_3D_rd : Texture3DRD 
 
 var texture_3D : RID
@@ -33,10 +35,10 @@ var pipeline
 
 func _ready():
 	RenderingServer.call_on_render_thread(initialize_compute)
-	for paintable in get_tree().get_nodes_in_group("paintable_element"):
-		paintable.get_surface_override_material(0).set_shader_parameter("map_size", map_size)
-		paintable.get_surface_override_material(0).set_shader_parameter("map_extents", map_extents)
-		paintable.get_surface_override_material(0).set_shader_parameter.call_deferred("world_paint_texture", texture_3D_rd)
+	volume_mesh.get_surface_override_material(0).set_shader_parameter("map_size", map_size)
+	volume_mesh.get_surface_override_material(0).set_shader_parameter("map_extents", map_extents)
+	volume_mesh.get_surface_override_material(0).set_shader_parameter.call_deferred("world_paint_texture", texture_3D_rd)
+	volume_mesh.visible = true
 
 func initialize_compute():
 	# We will be using our own RenderingDevice to handle the compute commands
