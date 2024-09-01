@@ -109,8 +109,6 @@ func initialize_compute():
 	
 	uniform_set = rd.uniform_set_create([texture_uniform, paint_texture_uniform], shader, 0)
 	
-	compute_size = (Vector3i(brush_radius, brush_radius, brush_radius) * 2 - Vector3i(1, 1, 1)) / 8 + Vector3i(1, 1, 1)
-	
 	texture_3D_rd = Texture3DRD.new()
 	texture_3D_rd.texture_rd_rid = texture_3D
 
@@ -129,13 +127,11 @@ func render_paint(in_position : Vector3, in_basis : Basis):
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set, 0)
 	# Dispatch 1x1x1 (XxYxZ) work groups
 	
-	var inverse_basis : Basis = global_basis.orthonormalized()
-	
-	in_position = inverse_basis * (in_position - global_position)
-	
-	in_basis = in_basis * inverse_basis.inverse()
+	in_position = global_basis.orthonormalized() * (in_position - global_position)
 	
 	var truncated_position : Vector3i = clamp(Vector3i((in_position + map_extents / 2) * Vector3(map_size) / map_extents), Vector3i(brush_radius, brush_radius, brush_radius), Vector3i(map_size.x - brush_radius, map_size.y - brush_radius, map_size.z - brush_radius))
+	
+	compute_size = (Vector3i(brush_radius, brush_radius, brush_radius) * 2 - Vector3i(1, 1, 1)) / 8 + Vector3i(1, 1, 1)
 	
 	var push_constants : PackedFloat32Array = [
 		truncated_position.x,
@@ -153,6 +149,18 @@ func render_paint(in_position : Vector3, in_basis : Basis):
 		in_basis.z.x,
 		in_basis.z.y,
 		in_basis.z.z,
+		0,
+		global_basis.x.x,
+		global_basis.x.y,
+		global_basis.x.z,
+		0,
+		global_basis.y.x,
+		global_basis.y.y,
+		global_basis.y.z,
+		0,
+		global_basis.z.x,
+		global_basis.z.y,
+		global_basis.z.z,
 		0,
 	]
 	
