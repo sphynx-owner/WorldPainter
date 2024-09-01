@@ -1,5 +1,6 @@
-[gd_scene load_steps=20 format=3 uid="uid://cos7vsxw5wgwr"]
+[gd_scene load_steps=21 format=3 uid="uid://cos7vsxw5wgwr"]
 
+[ext_resource type="Script" path="res://rotator.gd" id="1_lq32g"]
 [ext_resource type="Script" path="res://camera_3d.gd" id="1_wgonw"]
 [ext_resource type="Script" path="res://world_painter.gd" id="2_rbxql"]
 [ext_resource type="Texture2D" uid="uid://pf6gcvcphwgi" path="res://icon.svg" id="4_lxlxt"]
@@ -75,23 +76,7 @@ data = PackedVector3Array(-0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_0k78w"]
 
-[sub_resource type="SphereMesh" id="SphereMesh_5u1q8"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_bqdvh"]
-render_priority = 0
-shader = ExtResource("5_j4pth")
-
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_q32dd"]
-
-[sub_resource type="Sky" id="Sky_277mh"]
-sky_material = SubResource("ProceduralSkyMaterial_q32dd")
-
-[sub_resource type="Environment" id="Environment_fmhb4"]
-background_mode = 2
-sky = SubResource("Sky_277mh")
-
-[sub_resource type="BoxMesh" id="BoxMesh_rwjwj"]
-size = Vector3(40, 40, 40)
+[sub_resource type="BoxMesh" id="BoxMesh_4aj53"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_p53oa"]
 render_priority = 0
@@ -108,6 +93,21 @@ shader_parameter/uv2_scale = null
 shader_parameter/uv2_offset = null
 shader_parameter/map_size = null
 shader_parameter/map_extents = null
+
+[sub_resource type="SphereMesh" id="SphereMesh_5u1q8"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bqdvh"]
+render_priority = 0
+shader = ExtResource("5_j4pth")
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_q32dd"]
+
+[sub_resource type="Sky" id="Sky_277mh"]
+sky_material = SubResource("ProceduralSkyMaterial_q32dd")
+
+[sub_resource type="Environment" id="Environment_fmhb4"]
+background_mode = 2
+sky = SubResource("Sky_277mh")
 
 [node name="Node3D" type="Node3D"]
 
@@ -184,11 +184,20 @@ shape = SubResource("ConcavePolygonShape3D_pnw0f")
 transform = Transform3D(6.359, 0, 0, 0, 21.027, 0, 0, 0, 6.359, -1.4364, -0.845324, 0.863546)
 mesh = SubResource("CylinderMesh_qm0tb")
 surface_material_override/0 = SubResource("ShaderMaterial_erjfu")
+script = ExtResource("1_lq32g")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D4"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D4/StaticBody3D"]
 shape = SubResource("CylinderShape3D_0k78w")
+
+[node name="WorldPainter" type="MeshInstance3D" parent="MeshInstance3D4"]
+transform = Transform3D(1.315, 0, 0, 0, 2.107, 0, 0, 0, 1.31, 0, 0, 0)
+mesh = SubResource("BoxMesh_4aj53")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("ShaderMaterial_p53oa")
+script = ExtResource("2_rbxql")
+paint_texture = ExtResource("4_lxlxt")
 
 [node name="MeshInstance3D5" type="MeshInstance3D" parent="." groups=["paintable_element"]]
 transform = Transform3D(1, 0, 0, 0, 5.98673, 0.587785, 0, -4.34961, 0.809017, 2.84276, -0.845324, 2.61316)
@@ -211,9 +220,9 @@ surface_material_override/0 = SubResource("ShaderMaterial_erjfu")
 shape = SubResource("ConcavePolygonShape3D_pnw0f")
 
 [node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("world_painter", "raycast", "draw_timer", "basis_debug_mesh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.000303745, 0.43046, 1.98705)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.73339, 2.84213, 14.5993)
 script = ExtResource("1_wgonw")
-world_painter = NodePath("../WorldPainter")
+world_painter = NodePath("../MeshInstance3D4/WorldPainter")
 raycast = NodePath("RayCast3D")
 draw_timer = NodePath("Timer")
 basis_debug_mesh = NodePath("../NormalBasisDebug")
@@ -235,12 +244,3 @@ environment = SubResource("Environment_fmhb4")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment"]
 transform = Transform3D(1, 0, 0, 0, -0.0488672, 0.998805, 0, -0.998805, -0.0488672, 0, 0, 0)
-
-[node name="WorldPainter" type="Node" parent="." node_paths=PackedStringArray("volume_mesh")]
-script = ExtResource("2_rbxql")
-paint_texture = ExtResource("4_lxlxt")
-volume_mesh = NodePath("../VolumeMeshTest")
-
-[node name="VolumeMeshTest" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxMesh_rwjwj")
-surface_material_override/0 = SubResource("ShaderMaterial_p53oa")

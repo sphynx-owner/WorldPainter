@@ -1,15 +1,13 @@
-extends Node
+extends MeshInstance3D
 class_name WorldPainter
 
 @export var map_size : Vector3i = Vector3i(800, 800, 800)
-
-@export var map_extents : Vector3 = Vector3(50, 50, 50)
 
 @export var brush_radius : float = 50
 
 @export var paint_texture : Texture2D
 
-@export var volume_mesh : MeshInstance3D
+var map_extents : Vector3 = Vector3(50, 50, 50)
 
 var texture_3D_rd : Texture3DRD 
 
@@ -34,11 +32,12 @@ var shader
 var pipeline
 
 func _ready():
+	map_extents = global_transform.basis.get_scale()
 	RenderingServer.call_on_render_thread(initialize_compute)
-	volume_mesh.get_surface_override_material(0).set_shader_parameter("map_size", map_size)
-	volume_mesh.get_surface_override_material(0).set_shader_parameter("map_extents", map_extents)
-	volume_mesh.get_surface_override_material(0).set_shader_parameter.call_deferred("world_paint_texture", texture_3D_rd)
-	volume_mesh.visible = true
+	get_surface_override_material(0).set_shader_parameter("map_size", map_size)
+	get_surface_override_material(0).set_shader_parameter("map_extents", map_extents)
+	get_surface_override_material(0).set_shader_parameter.call_deferred("world_paint_texture", texture_3D_rd)
+	visible = true
 
 func initialize_compute():
 	# We will be using our own RenderingDevice to handle the compute commands
@@ -129,6 +128,12 @@ func render_paint(in_position : Vector3, in_basis : Basis):
 	# Binds the uniform set with the data we want to give our shader
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set, 0)
 	# Dispatch 1x1x1 (XxYxZ) work groups
+	
+	var inverse_basis : Basis = global_basis.orthonormalized()
+	
+	in_position = inverse_basis * (in_position - global_position)
+	
+	in_basis = in_basis * inverse_basis.inverse()
 	
 	var truncated_position : Vector3i = clamp(Vector3i((in_position + map_extents / 2) * Vector3(map_size) / map_extents), Vector3i(brush_radius, brush_radius, brush_radius), Vector3i(map_size.x - brush_radius, map_size.y - brush_radius, map_size.z - brush_radius))
 	

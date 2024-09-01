@@ -74,12 +74,22 @@ void fragment() {
 	
 	vec3 world_position = get_world(vec3(SCREEN_UV * 2. - 1., depth), inv_view_proj);
 	
-	vec3 truncated_world_position = vec3((world_position.xyz + map_extents / 2.) / map_extents);
+	vec3 model_position = vec3(MODEL_MATRIX[3][0], MODEL_MATRIX[3][1], MODEL_MATRIX[3][2]);
+	
+	mat3 model_normal_matrix = mat3(
+		normalize(vec3(MODEL_MATRIX[0][0], MODEL_MATRIX[1][0], MODEL_MATRIX[2][0])),
+		normalize(vec3(MODEL_MATRIX[0][1], MODEL_MATRIX[1][1], MODEL_MATRIX[2][1])),
+		normalize(vec3(MODEL_MATRIX[0][2], MODEL_MATRIX[1][2], MODEL_MATRIX[2][2]))
+	);
+	
+	vec3 local_position = inverse(model_normal_matrix) * (world_position - model_position);
+	
+	vec3 truncated_world_position = vec3((local_position + map_extents / 2.) / map_extents);
 
 	vec4 paint_texture_sample = texture(world_paint_texture, truncated_world_position);
 	
 	ALBEDO = paint_texture_sample.xyz;//vec3(normal);//world_position;//
-	ALPHA = paint_texture_sample.a;
+	ALPHA = paint_texture_sample.a * (1. - step(depth, 0));
 	DEPTH = depth;
 	NORMAL = -constructed_normal;
 	
