@@ -189,11 +189,14 @@ script = ExtResource("1_lq32g")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D4/StaticBody3D"]
 shape = SubResource("CylinderShape3D_0k78w")
 
-[node name="WorldPainter" type="MeshInstance3D" parent="."]
-transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)
+[node name="WorldPainter" type="MeshInstance3D" parent="MeshInstance3D4"]
+transform = Transform3D(1.04, 0, 0, 0, 2.13, 0, 0, 0, 1.05, 0, 0, 0)
 mesh = SubResource("BoxMesh_4aj53")
+skeleton = NodePath("../..")
 surface_material_override/0 = SubResource("ShaderMaterial_p53oa")
 script = ExtResource("2_rbxql")
+map_size = Vector3i(200, 800, 200)
+brush_size = 4.0
 paint_texture = ExtResource("4_lxlxt")
 
 [node name="MeshInstance3D5" type="MeshInstance3D" parent="." groups=["paintable_element"]]
@@ -219,7 +222,7 @@ shape = SubResource("ConcavePolygonShape3D_pnw0f")
 [node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("world_painter", "raycast", "draw_timer", "basis_debug_mesh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.73339, 2.84213, 14.5993)
 script = ExtResource("1_wgonw")
-world_painter = NodePath("../WorldPainter")
+world_painter = NodePath("../MeshInstance3D4/WorldPainter")
 raycast = NodePath("RayCast3D")
 draw_timer = NodePath("Timer")
 basis_debug_mesh = NodePath("../NormalBasisDebug")

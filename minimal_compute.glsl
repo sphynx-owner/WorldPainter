@@ -10,7 +10,7 @@ layout(push_constant, std430) uniform Params
 	vec3 position;	
 	float color_value;
 	mat3 surface_matrix;
-	//mat3 volume_matrix;
+	mat3 volume_matrix;
 	int nan0;
 	int nan1;
 	int nan2;
@@ -44,15 +44,15 @@ void main() {
 	
 	vec3 local_sample_offset = local_invocation_offset;
 
-	local_sample_offset =  ((params.surface_matrix * local_sample_offset + vec3(brush_size / 2)) / brush_size);
+	local_sample_offset = params.surface_matrix * (params.volume_matrix) * (local_sample_offset / brush_size) + vec3(0.5);
 
 	vec4 texture_sample = textureLod(paint_texture, local_sample_offset.xy, 0.0);
 		
 	vec4 existing_color = imageLoad(image, current_coordinate);
 
-	float offset_length = length(local_sample_offset);
+	float offset_length = length(local_sample_offset - vec3(0.5));
 
-	float new_color_opacity = texture_sample.a * params.color_value * 1;// * smoothstep(brush_size / 2, 0, offset_length);
+	float new_color_opacity = texture_sample.a * params.color_value * 1 * smoothstep(0.5, 0, offset_length);
 
 	vec4 color_output = vec4(mix(existing_color.xyz, texture_sample.xyz, new_color_opacity), clamp(existing_color.a + new_color_opacity, 0, 1));
 

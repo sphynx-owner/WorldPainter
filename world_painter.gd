@@ -118,9 +118,9 @@ func paint(in_position : Vector3, in_basis : Basis, brush_multiplier : float):
 	
 	compute_size = (compute_size - Vector3i(1, 1, 1)) / 8 + Vector3i(1, 1, 1)
 	
-	RenderingServer.call_on_render_thread(render_paint.bind(in_position, in_basis, brush_multiplier))
+	RenderingServer.call_on_render_thread(render_paint.bind(in_position, in_basis, global_basis.orthonormalized(), brush_multiplier))
 
-func render_paint(in_position : Vector3, in_basis : Basis, brush_multiplier : float):	
+func render_paint(in_position : Vector3, in_basis : Basis, volume_basis : Basis, brush_multiplier : float):	
 	var push_constants : PackedFloat32Array = [
 		in_position.x,
 		in_position.y,
@@ -138,18 +138,18 @@ func render_paint(in_position : Vector3, in_basis : Basis, brush_multiplier : fl
 		in_basis.z.y,
 		in_basis.z.z,
 		0,
-		#global_basis.x.x,
-		#global_basis.x.y,
-		#global_basis.x.z,
-		#0,
-		#global_basis.y.x,
-		#global_basis.y.y,
-		#global_basis.y.z,
-		#0,
-		#global_basis.z.x,
-		#global_basis.z.y,
-		#global_basis.z.z,
-		#0,
+		volume_basis.x.x,
+		volume_basis.x.y,
+		volume_basis.x.z,
+		0,
+		volume_basis.y.x,
+		volume_basis.y.y,
+		volume_basis.y.z,
+		0,
+		volume_basis.z.x,
+		volume_basis.z.y,
+		volume_basis.z.z,
+		0,
 	]
 	
 	var int_push_constants : PackedInt32Array = [
