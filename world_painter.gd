@@ -3,7 +3,7 @@ class_name WorldPainter
 
 @export var map_size : Vector3i = Vector3i(800, 800, 800)
 
-@export var brush_radius : float = 50
+@export var brush_size : float = 1
 
 @export var paint_texture : Texture2D
 
@@ -32,10 +32,7 @@ var shader
 var pipeline
 
 func _ready():
-	map_extents = global_transform.basis.get_scale()
 	RenderingServer.call_on_render_thread(initialize_compute)
-	get_surface_override_material(0).set_shader_parameter("map_size", map_size)
-	get_surface_override_material(0).set_shader_parameter("map_extents", map_extents)
 	get_surface_override_material(0).set_shader_parameter.call_deferred("world_paint_texture", texture_3D_rd)
 	visible = true
 
@@ -112,20 +109,11 @@ func initialize_compute():
 	texture_3D_rd = Texture3DRD.new()
 	texture_3D_rd.texture_rd_rid = texture_3D
 
-func paint(in_position : Vector3, in_basis : Basis):
+func paint(in_position : Vector3, in_basis : Basis, brush_multiplier : float):
 	RenderingServer.call_on_render_thread(render_paint.bind(in_position, in_basis))
 
-func erase(in_position : Vector3, in_basis : Basis):
-	RenderingServer.call_on_render_thread(render_erase.bind(in_position, in_basis))
-
-func render_paint(in_position : Vector3, in_basis : Basis):
-	# Start compute list to start recording our compute commands
-	compute_list = rd.compute_list_begin()
-	# Bind the pipeline, this tells the GPU what shader to use
-	rd.compute_list_bind_compute_pipeline(compute_list, pipeline)
-	# Binds the uniform set with the data we want to give our shader
-	rd.compute_list_bind_uniform_set(compute_list, uniform_set, 0)
-	# Dispatch 1x1x1 (XxYxZ) work groups
+func render_paint(in_position : Vector3, in_basis : Basis, brush_multiplier : float):
+	map_extents = global_transform.basis.get_scale()
 	
 	in_position = global_basis.orthonormalized() * (in_position - global_position)
 	
@@ -137,7 +125,7 @@ func render_paint(in_position : Vector3, in_basis : Basis):
 		truncated_position.x,
 		truncated_position.y,
 		truncated_position.z,
-		1,
+		brush_multiplier,
 		in_basis.x.x,
 		in_basis.x.y,
 		in_basis.x.z,
@@ -165,7 +153,7 @@ func render_paint(in_position : Vector3, in_basis : Basis):
 	]
 	
 	var int_push_constants : PackedInt32Array = [
-		brush_radius,
+		brush_size,
 		0,
 		0,
 		0,
@@ -175,58 +163,18 @@ func render_paint(in_position : Vector3, in_basis : Basis):
 	
 	byte_push_constants.append_array(int_push_constants.to_byte_array())
 	
-	rd.compute_list_set_push_constant(compute_list, byte_push_constants, byte_push_constants.size())
-	
-	rd.compute_list_dispatch(compute_list, compute_size.x, compute_size.y, compute_size.z)
-	#rd.compute_list_add_barrier(compute_list)
-	# Tell the GPU we are done with this compute task
-	rd.compute_list_end()
-	# Force the GPU to start our commands
-	rd.submit()
-	# Force the CPU to wait for the GPU to finish with the recorded commands
-	rd.sync()
-
-
-func render_erase(in_position : Vector3, in_basis : Basis):
-	# Start compute list to start recording our compute commands
 	compute_list = rd.compute_list_begin()
-	# Bind the pipeline, this tells the GPU what shader to use
+	
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline)
-	# Binds the uniform set with the data we want to give our shader
+	
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set, 0)
-	# Dispatch 1x1x1 (XxYxZ) work groups
-	
-	var truncated_position : Vector3i = clamp(Vector3i((in_position + map_extents / 2) * Vector3(map_size) / map_extents), Vector3i(brush_radius, brush_radius, brush_radius), Vector3i(map_size.x - brush_radius, map_size.y - brush_radius, map_size.z - brush_radius))
-	
-	var push_constants : PackedFloat32Array = [
-		truncated_position.x,
-		truncated_position.y,
-		truncated_position.z,
-		-1,
-		in_basis.x,
-		in_basis.y,
-		in_basis.z,
-		0,
-	]
-	
-	var int_push_constants : PackedInt32Array = [
-		brush_radius,
-		0,
-		0,
-		0,
-	]
-	
-	var byte_push_constants = push_constants.to_byte_array()
-	
-	byte_push_constants.append_array(int_push_constants.to_byte_array())
 	
 	rd.compute_list_set_push_constant(compute_list, byte_push_constants, byte_push_constants.size())
 	
 	rd.compute_list_dispatch(compute_list, compute_size.x, compute_size.y, compute_size.z)
-	#rd.compute_list_add_barrier(compute_list)
-	# Tell the GPU we are done with this compute task
+	
 	rd.compute_list_end()
-	# Force the GPU to start our commands
+	
 	rd.submit()
-	# Force the CPU to wait for the GPU to finish with the recorded commands
+	
 	rd.sync()

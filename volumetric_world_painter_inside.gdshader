@@ -23,16 +23,6 @@ uniform sampler2D depth_texture : hint_depth_texture, filter_nearest;
 
 uniform sampler3D world_paint_texture : repeat_disable;
 
-uniform ivec3 map_size;
-
-uniform vec3 map_extents;
-
-varying vec3 normal;
-
-void vertex() {
-	normal = NORMAL;
-}
-
 vec3 get_world(vec3 ndc, mat4 inverse_matrix){
 	vec4 world_position = inverse_matrix * vec4(ndc, 1.);
 	world_position.xyz /= world_position.w;
@@ -68,29 +58,19 @@ vec3 get_normal(vec2 uv, vec2 texel_size, mat4 inverse_matrix){
 void fragment() {
 	float depth = texture(depth_texture, SCREEN_UV).x;
 	
-	mat4 inv_view_proj = INV_VIEW_MATRIX * INV_PROJECTION_MATRIX;
-	
-	vec3 constructed_normal = get_normal(SCREEN_UV, vec2(1) / vec2(textureSize(depth_texture, 0)), INV_PROJECTION_MATRIX);
-	
-	vec3 world_position = get_world(vec3(SCREEN_UV * 2. - 1., depth), inv_view_proj);
+	vec3 world_position = get_world(vec3(SCREEN_UV * 2. - 1., depth), INV_VIEW_MATRIX * INV_PROJECTION_MATRIX);
 	
 	vec3 model_position = vec3(MODEL_MATRIX[3][0], MODEL_MATRIX[3][1], MODEL_MATRIX[3][2]);
 	
-	mat3 model_normal_matrix = mat3(
-		normalize(vec3(MODEL_MATRIX[0][0], MODEL_MATRIX[1][0], MODEL_MATRIX[2][0])),
-		normalize(vec3(MODEL_MATRIX[0][1], MODEL_MATRIX[1][1], MODEL_MATRIX[2][1])),
-		normalize(vec3(MODEL_MATRIX[0][2], MODEL_MATRIX[1][2], MODEL_MATRIX[2][2]))
-	);
+	vec3 local_position = inverse(mat3(MODEL_MATRIX)) * (world_position - model_position);
 	
-	vec3 local_position = inverse(model_normal_matrix) * (world_position - model_position);
+	vec4 paint_texture_sample = texture(world_paint_texture, local_position + vec3(0.5));
 	
-	vec3 truncated_world_position = vec3((local_position + map_extents / 2.) / map_extents);
-
-	vec4 paint_texture_sample = texture(world_paint_texture, truncated_world_position);
-	
-	ALBEDO = paint_texture_sample.xyz;//vec3(normal);//world_position;//
+	ALBEDO = paint_texture_sample.xyz;
 	ALPHA = paint_texture_sample.a * (1. - step(depth, 0));
 	DEPTH = depth;
+	
+	vec3 constructed_normal = get_normal(SCREEN_UV, vec2(1) / vec2(textureSize(depth_texture, 0)), INV_PROJECTION_MATRIX);
 	NORMAL = -constructed_normal;
 	
 	float metallic_tex = dot(texture(texture_metallic, UV), metallic_texture_channel);

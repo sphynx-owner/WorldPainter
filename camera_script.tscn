@@ -91,8 +91,6 @@ shader_parameter/uv1_scale = null
 shader_parameter/uv1_offset = null
 shader_parameter/uv2_scale = null
 shader_parameter/uv2_offset = null
-shader_parameter/map_size = null
-shader_parameter/map_extents = null
 
 [sub_resource type="SphereMesh" id="SphereMesh_5u1q8"]
 
@@ -181,7 +179,7 @@ surface_material_override/0 = SubResource("ShaderMaterial_erjfu")
 shape = SubResource("ConcavePolygonShape3D_pnw0f")
 
 [node name="MeshInstance3D4" type="MeshInstance3D" parent="." groups=["paintable_element"]]
-transform = Transform3D(6.359, 0, 0, 0, 21.027, 0, 0, 0, 6.359, -1.4364, -0.845324, 0.863546)
+transform = Transform3D(6.359, 0, 0, 0, 21.027, 0, 0, 0, 6.359, 0.614864, -0.845324, 9.91513)
 mesh = SubResource("CylinderMesh_qm0tb")
 surface_material_override/0 = SubResource("ShaderMaterial_erjfu")
 script = ExtResource("1_lq32g")
@@ -192,11 +190,13 @@ script = ExtResource("1_lq32g")
 shape = SubResource("CylinderShape3D_0k78w")
 
 [node name="WorldPainter" type="MeshInstance3D" parent="MeshInstance3D4"]
-transform = Transform3D(1.315, 0, 0, 0, 2.107, 0, 0, 0, 1.31, 0, 0, 0)
+transform = Transform3D(0.0964914, 0, -1.30647, 0, 2.107, 0, 1.31146, 0, 0.0961248, 0, 0, 0)
 mesh = SubResource("BoxMesh_4aj53")
 skeleton = NodePath("../..")
 surface_material_override/0 = SubResource("ShaderMaterial_p53oa")
 script = ExtResource("2_rbxql")
+map_size = null
+brush_radius = null
 paint_texture = ExtResource("4_lxlxt")
 
 [node name="MeshInstance3D5" type="MeshInstance3D" parent="." groups=["paintable_element"]]
