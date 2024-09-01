@@ -34,7 +34,6 @@ var pipeline
 func _ready():
 	RenderingServer.call_on_render_thread(initialize_compute)
 	get_surface_override_material(0).set_shader_parameter.call_deferred("world_paint_texture", texture_3D_rd)
-	visible = true
 
 func initialize_compute():
 	# We will be using our own RenderingDevice to handle the compute commands
