@@ -110,18 +110,17 @@ func initialize_compute():
 	texture_3D_rd.texture_rd_rid = texture_3D
 
 func paint(in_position : Vector3, in_basis : Basis, brush_multiplier : float):
-	RenderingServer.call_on_render_thread(render_paint.bind(in_position, in_basis))
-
-func render_paint(in_position : Vector3, in_basis : Basis, brush_multiplier : float):
-	map_extents = global_transform.basis.get_scale()
-	
 	in_position = global_basis.inverse() * (in_position - global_position)
 	
 	in_position = (in_position + Vector3(0.5, 0.5, 0.5)) * Vector3(map_size)
 	
+	compute_size = Vector3(brush_size, brush_size, brush_size) / global_transform.basis.get_scale() * Vector3(map_size)
 	
-	compute_size = (Vector3i(brush_radius, brush_radius, brush_radius) * 2 - Vector3i(1, 1, 1)) / 8 + Vector3i(1, 1, 1)
+	compute_size = (compute_size - Vector3i(1, 1, 1)) / 8 + Vector3i(1, 1, 1)
 	
+	RenderingServer.call_on_render_thread(render_paint.bind(in_position, in_basis, brush_multiplier))
+
+func render_paint(in_position : Vector3, in_basis : Basis, brush_multiplier : float):	
 	var push_constants : PackedFloat32Array = [
 		in_position.x,
 		in_position.y,
@@ -139,22 +138,22 @@ func render_paint(in_position : Vector3, in_basis : Basis, brush_multiplier : fl
 		in_basis.z.y,
 		in_basis.z.z,
 		0,
-		global_basis.x.x,
-		global_basis.x.y,
-		global_basis.x.z,
-		0,
-		global_basis.y.x,
-		global_basis.y.y,
-		global_basis.y.z,
-		0,
-		global_basis.z.x,
-		global_basis.z.y,
-		global_basis.z.z,
-		0,
+		#global_basis.x.x,
+		#global_basis.x.y,
+		#global_basis.x.z,
+		#0,
+		#global_basis.y.x,
+		#global_basis.y.y,
+		#global_basis.y.z,
+		#0,
+		#global_basis.z.x,
+		#global_basis.z.y,
+		#global_basis.z.z,
+		#0,
 	]
 	
 	var int_push_constants : PackedInt32Array = [
-		brush_size,
+		0,
 		0,
 		0,
 		0,

@@ -62,9 +62,14 @@ void fragment() {
 	
 	vec3 model_position = vec3(MODEL_MATRIX[3][0], MODEL_MATRIX[3][1], MODEL_MATRIX[3][2]);
 	
-	vec3 local_position = inverse(mat3(MODEL_MATRIX)) * (world_position - model_position);
+	vec3 local_position = inverse(mat3(MODEL_MATRIX)) * (world_position - model_position) + vec3(0.5);
 	
-	vec4 paint_texture_sample = texture(world_paint_texture, local_position + vec3(0.5));
+	if (local_position.x > 1. || local_position.x < 0. || local_position.y > 1. || local_position.y < 0. || local_position.z > 1. || local_position.z < 0.)
+	{
+		discard;
+	}
+	
+	vec4 paint_texture_sample = texture(world_paint_texture, local_position);
 	
 	ALBEDO = paint_texture_sample.xyz;
 	ALPHA = paint_texture_sample.a * (1. - step(depth, 0));
