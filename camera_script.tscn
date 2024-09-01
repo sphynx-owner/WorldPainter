@@ -1,12 +1,69 @@
-[gd_scene load_steps=18 format=3 uid="uid://cos7vsxw5wgwr"]
+[gd_scene load_steps=20 format=3 uid="uid://cos7vsxw5wgwr"]
 
 [ext_resource type="Script" path="res://camera_3d.gd" id="1_wgonw"]
 [ext_resource type="Script" path="res://world_painter.gd" id="2_rbxql"]
 [ext_resource type="Texture2D" uid="uid://pf6gcvcphwgi" path="res://icon.svg" id="4_lxlxt"]
+[ext_resource type="Shader" path="res://volumetric_world_painter_inside.gdshader" id="5_64eih"]
 [ext_resource type="Shader" path="res://basis_debug.gdshader" id="5_j4pth"]
-[ext_resource type="Shader" path="res://volumetric_world_painter_outside.gdshader" id="6_wsrrc"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_8xnkm"]
+
+[sub_resource type="Shader" id="Shader_juf0e"]
+code = "// NOTE: Shader automatically converted from Godot Engine 4.3.rc3's StandardMaterial3D.
+
+shader_type spatial;
+render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
+
+uniform vec4 albedo : source_color;
+uniform sampler2D texture_albedo : source_color, filter_linear_mipmap, repeat_enable;
+uniform float point_size : hint_range(0.1, 128.0, 0.1);
+
+uniform float roughness : hint_range(0.0, 1.0);
+uniform sampler2D texture_metallic : hint_default_white, filter_linear_mipmap, repeat_enable;
+uniform vec4 metallic_texture_channel;
+uniform sampler2D texture_roughness : hint_roughness_r, filter_linear_mipmap, repeat_enable;
+
+uniform float specular : hint_range(0.0, 1.0, 0.01);
+uniform float metallic : hint_range(0.0, 1.0, 0.01);
+
+uniform vec3 uv1_scale;
+uniform vec3 uv1_offset;
+uniform vec3 uv2_scale;
+uniform vec3 uv2_offset;
+
+void vertex() {
+	UV = UV * uv1_scale.xy + uv1_offset.xy;
+}
+
+void fragment() {
+	vec2 base_uv = UV;
+
+	vec4 albedo_tex = texture(texture_albedo, base_uv);
+	ALBEDO = albedo.rgb * albedo_tex.rgb;
+
+	float metallic_tex = dot(texture(texture_metallic, base_uv), metallic_texture_channel);
+	METALLIC = metallic_tex * metallic;
+	SPECULAR = specular;
+
+	vec4 roughness_texture_channel = vec4(1.0, 0.0, 0.0, 0.0);
+	float roughness_tex = dot(texture(texture_roughness, base_uv), roughness_texture_channel);
+	ROUGHNESS = roughness_tex * roughness;
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_erjfu"]
+render_priority = 0
+shader = SubResource("Shader_juf0e")
+shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/point_size = 1.0
+shader_parameter/roughness = 1.0
+shader_parameter/metallic_texture_channel = null
+shader_parameter/specular = 0.5
+shader_parameter/metallic = 0.0
+shader_parameter/uv1_scale = Vector3(1, 1, 1)
+shader_parameter/uv1_offset = Vector3(0, 0, 0)
+shader_parameter/uv2_scale = Vector3(1, 1, 1)
+shader_parameter/uv2_offset = Vector3(0, 0, 0)
 
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_ujjs2"]
 data = PackedVector3Array(-0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, -0.5)
@@ -38,7 +95,17 @@ size = Vector3(40, 40, 40)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_p53oa"]
 render_priority = 0
-shader = ExtResource("6_wsrrc")
+shader = ExtResource("5_64eih")
+shader_parameter/albedo = null
+shader_parameter/point_size = null
+shader_parameter/roughness = null
+shader_parameter/metallic_texture_channel = null
+shader_parameter/specular = null
+shader_parameter/metallic = null
+shader_parameter/uv1_scale = null
+shader_parameter/uv1_offset = null
+shader_parameter/uv2_scale = null
+shader_parameter/uv2_offset = null
 shader_parameter/map_size = null
 shader_parameter/map_extents = null
 
@@ -46,6 +113,7 @@ shader_parameter/map_extents = null
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." groups=["paintable_element"]]
 mesh = SubResource("BoxMesh_8xnkm")
+surface_material_override/0 = SubResource("ShaderMaterial_erjfu")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D"]
 
@@ -55,6 +123,7 @@ shape = SubResource("ConcavePolygonShape3D_ujjs2")
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="." groups=["paintable_element"]]
 transform = Transform3D(4.50669, 0, 1.19275, 0, 0.352237, 0, -2.22588, 0, 2.41494, 0, -0.845324, 0.863546)
 mesh = SubResource("BoxMesh_8xnkm")
+surface_material_override/0 = SubResource("ShaderMaterial_erjfu")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D2"]
 
@@ -64,6 +133,7 @@ shape = SubResource("ConcavePolygonShape3D_pnw0f")
 [node name="MeshInstance3D7" type="MeshInstance3D" parent="." groups=["paintable_element"]]
 transform = Transform3D(28.7084, 0, 0, 0, 10.7755, 0, 0, 0, 0.88, 0, -0.845324, -0.787615)
 mesh = SubResource("BoxMesh_8xnkm")
+surface_material_override/0 = SubResource("ShaderMaterial_erjfu")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D7"]
 
@@ -73,15 +143,27 @@ shape = SubResource("ConcavePolygonShape3D_pnw0f")
 [node name="MeshInstance3D9" type="MeshInstance3D" parent="." groups=["paintable_element"]]
 transform = Transform3D(11.85, 0, 0, 0, 10.63, 0, 0, 0, 20.075, 16.5796, 0, 0)
 mesh = SubResource("BoxMesh_8xnkm")
+surface_material_override/0 = SubResource("ShaderMaterial_erjfu")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D9"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D9/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_pnw0f")
 
+[node name="MeshInstance3D10" type="MeshInstance3D" parent="." groups=["paintable_element"]]
+transform = Transform3D(11.85, 0, 0, 0, 10.63, 0, 0, 0, 20.075, 47.6429, 0, 0)
+mesh = SubResource("BoxMesh_8xnkm")
+surface_material_override/0 = SubResource("ShaderMaterial_erjfu")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D10"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D10/StaticBody3D"]
+shape = SubResource("ConcavePolygonShape3D_pnw0f")
+
 [node name="MeshInstance3D8" type="MeshInstance3D" parent="." groups=["paintable_element"]]
 transform = Transform3D(7.43028, 0, 0.850015, 0, 10.7755, 0, -27.7302, 0, 0.227761, 0, -0.845324, -0.787615)
 mesh = SubResource("BoxMesh_8xnkm")
+surface_material_override/0 = SubResource("ShaderMaterial_erjfu")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D8"]
 
@@ -91,6 +173,7 @@ shape = SubResource("ConcavePolygonShape3D_pnw0f")
 [node name="MeshInstance3D3" type="MeshInstance3D" parent="." groups=["paintable_element"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.50965, -0.845324, 0.863546)
 mesh = SubResource("BoxMesh_8xnkm")
+surface_material_override/0 = SubResource("ShaderMaterial_erjfu")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D3"]
 
@@ -100,6 +183,7 @@ shape = SubResource("ConcavePolygonShape3D_pnw0f")
 [node name="MeshInstance3D4" type="MeshInstance3D" parent="." groups=["paintable_element"]]
 transform = Transform3D(6.359, 0, 0, 0, 21.027, 0, 0, 0, 6.359, -1.4364, -0.845324, 0.863546)
 mesh = SubResource("CylinderMesh_qm0tb")
+surface_material_override/0 = SubResource("ShaderMaterial_erjfu")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D4"]
 
@@ -109,6 +193,7 @@ shape = SubResource("CylinderShape3D_0k78w")
 [node name="MeshInstance3D5" type="MeshInstance3D" parent="." groups=["paintable_element"]]
 transform = Transform3D(1, 0, 0, 0, 5.98673, 0.587785, 0, -4.34961, 0.809017, 2.84276, -0.845324, 2.61316)
 mesh = SubResource("BoxMesh_8xnkm")
+surface_material_override/0 = SubResource("ShaderMaterial_erjfu")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D5"]
 
@@ -118,6 +203,7 @@ shape = SubResource("ConcavePolygonShape3D_pnw0f")
 [node name="MeshInstance3D6" type="MeshInstance3D" parent="." groups=["paintable_element"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.25821, -0.110827, 2.06138)
 mesh = SubResource("BoxMesh_8xnkm")
+surface_material_override/0 = SubResource("ShaderMaterial_erjfu")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D6"]
 
@@ -147,11 +233,11 @@ surface_material_override/0 = SubResource("ShaderMaterial_bqdvh")
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_fmhb4")
 
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment"]
+transform = Transform3D(1, 0, 0, 0, -0.0488672, 0.998805, 0, -0.998805, -0.0488672, 0, 0, 0)
+
 [node name="WorldPainter" type="Node" parent="." node_paths=PackedStringArray("volume_mesh")]
 script = ExtResource("2_rbxql")
-map_size = null
-map_extents = null
-brush_radius = null
 paint_texture = ExtResource("4_lxlxt")
 volume_mesh = NodePath("../VolumeMeshTest")
 

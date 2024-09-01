@@ -1,9 +1,25 @@
 shader_type spatial;
+render_mode blend_mix, depth_draw_opaque, cull_disabled, diffuse_burley, specular_schlick_ggx, shadows_disabled;
 
-render_mode unshaded, cull_front;
+uniform vec4 albedo : source_color;
+uniform sampler2D texture_albedo : source_color, filter_linear_mipmap, repeat_enable;
+uniform float point_size : hint_range(0.1, 128.0, 0.1);
 
-uniform sampler2D screen_texture : hint_screen_texture;
-uniform sampler2D depth_texture : hint_depth_texture;
+uniform float roughness : hint_range(0.0, 1.0);
+uniform sampler2D texture_metallic : hint_default_white, filter_linear_mipmap, repeat_enable;
+uniform vec4 metallic_texture_channel;
+uniform sampler2D texture_roughness : hint_roughness_r, filter_linear_mipmap, repeat_enable;
+
+uniform float specular : hint_range(0.0, 1.0, 0.01);
+uniform float metallic : hint_range(0.0, 1.0, 0.01);
+
+uniform vec3 uv1_scale;
+uniform vec3 uv1_offset;
+uniform vec3 uv2_scale;
+uniform vec3 uv2_offset;
+
+uniform sampler2D screen_texture : hint_screen_texture, filter_nearest;
+uniform sampler2D depth_texture : hint_depth_texture, filter_nearest;
 
 uniform sampler3D world_paint_texture : repeat_disable;
 
@@ -17,24 +33,61 @@ void vertex() {
 	normal = NORMAL;
 }
 
+vec3 get_world(vec3 ndc, mat4 inverse_matrix){
+	vec4 world_position = inverse_matrix * vec4(ndc, 1.);
+	world_position.xyz /= world_position.w;
+	return world_position.xyz;
+}
+// from https://www.shadertoy.com/view/fsVczR
+vec3 get_normal(vec2 uv, vec2 texel_size, mat4 inverse_matrix){
+	float c0 = texture(depth_texture, uv).x;
+	float l2 = texture(depth_texture, uv - texel_size * vec2(2, 0)).x;
+	float l1 = texture(depth_texture, uv - texel_size * vec2(1, 0)).x;
+	float r1 = texture(depth_texture, uv + texel_size * vec2(1, 0)).x;
+	float r2 = texture(depth_texture, uv + texel_size * vec2(2, 0)).x;
+	float b2 = texture(depth_texture, uv - texel_size * vec2(0, 2)).x;
+	float b1 = texture(depth_texture, uv - texel_size * vec2(0, 1)).x;
+	float t1 = texture(depth_texture, uv + texel_size * vec2(0, 1)).x;
+	float t2 = texture(depth_texture, uv + texel_size * vec2(0, 2)).x;
+	
+	float dl = abs(l1 * l2 / (2.0 * l2 - l1) - c0);
+	float dr = abs(r1 * r2 / (2.0 * r2 - r1) - c0);
+	float db = abs(b1 * b2 / (2.0 * b2 - b1) - c0);
+	float dt = abs(t1 * t2 / (2.0 * t2 - t1) - c0);
+	
+	vec3 ce = get_world(vec3(uv * 2. - 1., c0), inverse_matrix);
+	
+	vec3 dpdx = (dl < dr) ? ce - get_world(vec3((uv - texel_size * vec2(1, 0)) * 2. - 1., l1), inverse_matrix) 
+	: - ce + get_world(vec3((uv + texel_size * vec2(1, 0)) * 2. - 1., r1), inverse_matrix);
+	vec3 dpdy = (db < dt) ? ce - get_world(vec3((uv - texel_size * vec2(0, 1)) * 2. - 1., b1), inverse_matrix) 
+	: - ce + get_world(vec3((uv + texel_size * vec2(0, 1)) * 2. - 1., t1), inverse_matrix);
+	
+	return normalize(cross(dpdx, dpdy));
+}
+
 void fragment() {
 	float depth = texture(depth_texture, SCREEN_UV).x;
 	
-	float fragment_depth = FRAGCOORD.z;
-	vec4 fragment_world_position = INV_VIEW_MATRIX * INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2. - 1., fragment_depth, 1.);
-	fragment_world_position.xyz /= fragment_world_position.w;
-
-	vec3 camera_fragment_offset = CAMERA_POSITION_WORLD - fragment_world_position.xyz;
-	float from_outside = step(0, dot(camera_fragment_offset, normal));
+	mat4 inv_view_proj = INV_VIEW_MATRIX * INV_PROJECTION_MATRIX;
 	
-	float final_depth = mix(depth, FRAGCOORD.z, from_outside);
-	vec4 world_position = INV_VIEW_MATRIX * INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2. - 1., final_depth, 1.);
-	world_position.xyz /= world_position.w;
-
+	vec3 constructed_normal = get_normal(SCREEN_UV, vec2(1) / vec2(textureSize(depth_texture, 0)), INV_PROJECTION_MATRIX);
+	
+	vec3 world_position = get_world(vec3(SCREEN_UV * 2. - 1., depth), inv_view_proj);
+	
 	vec3 truncated_world_position = vec3((world_position.xyz + map_extents / 2.) / map_extents);
 
 	vec4 paint_texture_sample = texture(world_paint_texture, truncated_world_position);
 	
-	ALBEDO = vec3(normal);//texture(screen_texture, SCREEN_UV).xyz + paint_texture_sample.xyz;
-	DEPTH = final_depth;
+	ALBEDO = paint_texture_sample.xyz;//vec3(normal);//world_position;//
+	ALPHA = paint_texture_sample.a;
+	DEPTH = depth;
+	NORMAL = -constructed_normal;
+	
+	float metallic_tex = dot(texture(texture_metallic, UV), metallic_texture_channel);
+	METALLIC = metallic_tex * metallic;
+	SPECULAR = specular;
+
+	vec4 roughness_texture_channel = vec4(1.0, 0.0, 0.0, 0.0);
+	float roughness_tex = dot(texture(texture_roughness, UV), roughness_texture_channel);
+	ROUGHNESS = roughness_tex * roughness;
 }
