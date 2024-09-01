@@ -115,16 +115,17 @@ func paint(in_position : Vector3, in_basis : Basis, brush_multiplier : float):
 func render_paint(in_position : Vector3, in_basis : Basis, brush_multiplier : float):
 	map_extents = global_transform.basis.get_scale()
 	
-	in_position = global_basis.orthonormalized() * (in_position - global_position)
+	in_position = global_basis.inverse() * (in_position - global_position)
 	
-	var truncated_position : Vector3i = clamp(Vector3i((in_position + map_extents / 2) * Vector3(map_size) / map_extents), Vector3i(brush_radius, brush_radius, brush_radius), Vector3i(map_size.x - brush_radius, map_size.y - brush_radius, map_size.z - brush_radius))
+	in_position = (in_position + Vector3(0.5, 0.5, 0.5)) * Vector3(map_size)
+	
 	
 	compute_size = (Vector3i(brush_radius, brush_radius, brush_radius) * 2 - Vector3i(1, 1, 1)) / 8 + Vector3i(1, 1, 1)
 	
 	var push_constants : PackedFloat32Array = [
-		truncated_position.x,
-		truncated_position.y,
-		truncated_position.z,
+		in_position.x,
+		in_position.y,
+		in_position.z,
 		brush_multiplier,
 		in_basis.x.x,
 		in_basis.x.y,
