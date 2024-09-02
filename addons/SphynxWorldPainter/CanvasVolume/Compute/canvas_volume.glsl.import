@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://cie3tk74g2kjs"
+path="res://.godot/imported/canvas_volume.glsl-7334e5ed1a5ec5302cb5c95333dfd024.res"
+
+[deps]
+
+source_file="res://addons/SphynxWorldPainter/CanvasVolume/Compute/canvas_volume.glsl"
+dest_files=["res://.godot/imported/canvas_volume.glsl-7334e5ed1a5ec5302cb5c95333dfd024.res"]
+
+[params]
+

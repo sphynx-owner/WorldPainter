@@ -52,7 +52,7 @@ func draw_process():
 		world_painter.paint(raycast.get_collision_point(), normal_to_basis(raycast.get_collision_normal()), 1)
 	
 	if Input.is_action_pressed("RightClick"):
-		world_painter.erase(raycast.get_collision_point(), normal_to_basis(raycast.get_collision_normal()), -1)
+		world_painter.paint(raycast.get_collision_point(), normal_to_basis(raycast.get_collision_normal()), -1)
 
 
 func normal_to_basis(normal : Vector3) -> Basis:

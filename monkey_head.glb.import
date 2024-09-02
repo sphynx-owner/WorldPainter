@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cidk0v76s8kop"
-path="res://.godot/imported/MonkeyHead.fbx-01586d2d8ace4cd57cdacca0fb09c57a.scn"
+uid="uid://b5hbapxn3i7ag"
+path="res://.godot/imported/monkey_head.glb-082b02d1392e67d4aa110d84939534b3.scn"
 
 [deps]
 
-source_file="res://MonkeyHead.fbx"
-dest_files=["res://.godot/imported/MonkeyHead.fbx-01586d2d8ace4cd57cdacca0fb09c57a.scn"]
+source_file="res://monkey_head.glb"
+dest_files=["res://.godot/imported/monkey_head.glb-082b02d1392e67d4aa110d84939534b3.scn"]
 
 [params]
 
@@ -27,11 +27,10 @@ meshes/force_disable_compression=false
 skins/use_named_skins=true
 animation/import=true
 animation/fps=30
-animation/trimming=true
+animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={}
-fbx/importer=0
-fbx/allow_geometry_helper_nodes=false
-fbx/embedded_image_handling=1
+gltf/naming_version=1
+gltf/embedded_image_handling=1
