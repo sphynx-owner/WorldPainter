@@ -6,7 +6,14 @@ extends Camera3D
 
 @export var draw_timer : Timer
 
-@export var basis_debug_mesh : MeshInstance3D
+var can_draw : bool = true
+
+
+func _ready():
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	
+	draw_timer.timeout.connect(on_draw_timer_timeout)
+
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
@@ -19,10 +26,6 @@ func _input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed("RightClick"):
 		world_painter.paint(raycast.get_collision_point(), normal_to_basis(raycast.get_collision_normal()), -1)
 
-func _ready():
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	
-	draw_timer.timeout.connect(on_draw_timer_timeout)
 
 func _process(delta: float) -> void:
 	var movement_input : Vector2 = Input.get_vector("A", "D", "W", "S")
@@ -32,13 +35,11 @@ func _process(delta: float) -> void:
 	global_position += global_basis * movement_3D_input
 	
 	draw_process()
-	#if movement_3D_input.length() > 0:
-		#draw_process()
 
-var can_draw : bool = true
 
 func on_draw_timer_timeout():
 	can_draw = true
+
 
 func draw_process():
 	if !can_draw:
@@ -53,6 +54,7 @@ func draw_process():
 	if Input.is_action_pressed("RightClick"):
 		world_painter.erase(raycast.get_collision_point(), normal_to_basis(raycast.get_collision_normal()), -1)
 
+
 func normal_to_basis(normal : Vector3) -> Basis:
 	var result_basis : Basis
 	var z : Vector3 = normal
@@ -60,6 +62,4 @@ func normal_to_basis(normal : Vector3) -> Basis:
 	var x : Vector3 = z.cross(y) if !normal.is_equal_approx(Vector3(0, 1, 0)) else Vector3(1, 0, 0)
 	y = z.cross(x) if !normal.is_equal_approx(Vector3(0, 1, 0)) else y
 	result_basis = Basis(x.normalized(), y.normalized(), z.normalized())
-	basis_debug_mesh.global_basis = result_basis
-	basis_debug_mesh.global_position = raycast.get_collision_point() 
 	return result_basis

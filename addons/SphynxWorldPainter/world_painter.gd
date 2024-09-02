@@ -7,8 +7,6 @@ class_name WorldPainter
 
 @export var paint_texture : Texture2D
 
-var map_extents : Vector3 = Vector3(50, 50, 50)
-
 var texture_3D_rd : Texture3DRD 
 
 var texture_3D : RID
@@ -16,8 +14,6 @@ var texture_3D : RID
 var texture_uniform : RDUniform
 
 var texture3D_view : RDTextureView
-
-var depth_texture_rd : Texture2DRD
 
 var compute_list : int
 
@@ -27,20 +23,21 @@ var uniform_set : RID
 
 var rd : RenderingDevice = null
 var shader_file : RDShaderFile
-var shader_bytecode
 var shader
 var pipeline
+
 
 func _ready():
 	RenderingServer.call_on_render_thread(initialize_compute)
 	get_surface_override_material(0).set_shader_parameter.call_deferred("world_paint_texture", texture_3D_rd)
+
 
 func initialize_compute():
 	# We will be using our own RenderingDevice to handle the compute commands
 	rd = RenderingServer.get_rendering_device()
 	
 	# Create shader and pipeline
-	shader_file = load("res://minimal_compute.glsl")
+	shader_file = load("res://addons/SphynxWorldPainter/minimal_compute.glsl")
 	var shader_spirv : RDShaderSPIRV = shader_file.get_spirv()
 	shader = rd.shader_create_from_spirv(shader_spirv)
 	pipeline = rd.compute_pipeline_create(shader)
@@ -108,6 +105,7 @@ func initialize_compute():
 	texture_3D_rd = Texture3DRD.new()
 	texture_3D_rd.texture_rd_rid = texture_3D
 
+
 func paint(in_position : Vector3, in_basis : Basis, brush_multiplier : float):
 	in_position = global_basis.inverse() * (in_position - global_position)
 	
@@ -118,6 +116,7 @@ func paint(in_position : Vector3, in_basis : Basis, brush_multiplier : float):
 	compute_size = (compute_size - Vector3i(1, 1, 1)) / 8 + Vector3i(1, 1, 1)
 	
 	RenderingServer.call_on_render_thread(render_paint.bind(in_position, in_basis, global_basis.orthonormalized(), brush_multiplier))
+
 
 func render_paint(in_position : Vector3, in_basis : Basis, volume_basis : Basis, brush_multiplier : float):	
 	var push_constants : PackedFloat32Array = [
