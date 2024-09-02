@@ -56,6 +56,7 @@ func draw_process():
 
 
 func normal_to_basis(normal : Vector3) -> Basis:
+	normal = normal.normalized()
 	var result_basis : Basis
 	var z : Vector3 = normal
 	var y : Vector3 = Vector3(0, 1, 0) if !normal.is_equal_approx(Vector3(0, 1, 0)) else Vector3(0, 0, 1)
