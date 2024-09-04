@@ -107,6 +107,7 @@ func initialize_compute():
 
 
 func paint(in_position : Vector3, in_basis : Basis, brush_multiplier : float):
+	print(in_position)
 	in_position = global_basis.inverse() * (in_position - global_position)
 	
 	in_position = (in_position + Vector3(0.5, 0.5, 0.5)) * Vector3(map_size)

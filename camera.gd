@@ -18,7 +18,7 @@ func _ready():
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		global_rotation += Vector3(rad_to_deg(-event.relative.y), rad_to_deg(-event.relative.x), 0) / 10000
-		#draw_process()
+		draw_process()
 	
 	if Input.is_action_just_pressed("LeftClick"):
 		world_painter.paint(raycast.get_collision_point(), normal_to_basis(raycast.get_collision_normal()), 1)
