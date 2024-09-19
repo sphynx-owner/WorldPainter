@@ -104,7 +104,6 @@ shape = SubResource("ConcavePolygonShape3D_d543q")
 [node name="WorldPainter" type="MeshInstance3D" parent="Suzanne" node_paths=PackedStringArray("relevant_collisions")]
 mesh = SubResource("ArrayMesh_kp4uw")
 script = ExtResource("4_heif3")
-map_resolution = Vector3i(100, 100, 100)
 relevant_collisions = [NodePath("../StaticBody3D")]
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
@@ -121,7 +120,6 @@ shape = SubResource("ConcavePolygonShape3D_a4pff")
 mesh = SubResource("SphereMesh_nj0og")
 skeleton = NodePath("../../Suzanne")
 script = ExtResource("4_heif3")
-map_resolution = Vector3i(100, 100, 100)
 relevant_collisions = [NodePath("../StaticBody3D")]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]

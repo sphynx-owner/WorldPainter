@@ -6,7 +6,7 @@ const world_painter_material : Material = preload("res://addons/SphynxWorldPaint
 ## [color=yellow]Warning:[/color] Having too many pixels assigned across
 ## all your world paint textures can easily lead to GPU memory limits being reached
 ## avoid having more than 1,000,000 pixels per world painter.[br]
-@export var map_resolution : Vector3i = Vector3i(800, 800, 800)
+@export var map_resolution : Vector3i = Vector3i(100, 100, 100)
 ## Wether the pixel count scales with the texture or represents the resolution per
 ## world unit.[br][br]
 ## [color=yellow]Warning:[/color] this counts the meshe's extents as well, meaning larger
