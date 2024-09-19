@@ -85,7 +85,6 @@ func initialize_compute():
 
 
 func paint(brush : WorldBrush, in_position : Vector3, in_basis : Basis, brush_multiplier : float):
-	print(in_position)
 	in_position = global_basis.scaled(mesh_extents).inverse() * (in_position - global_position)
 	
 	in_position = (in_position + Vector3(0.5, 0.5, 0.5)) * Vector3(map_resolution)

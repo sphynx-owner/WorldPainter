@@ -137,3 +137,19 @@ script = ExtResource("4_heif3")
 map_resolution = Vector3i(50, 50, 50)
 world_space_resolution = true
 relevant_collisions = [NodePath("../StaticBody3D")]
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
+transform = Transform3D(9.53762, 0, 0, 0, 10, 0, 0, 0, 1, 18.4594, 1.4043, 0)
+mesh = SubResource("BoxMesh_fh8sw")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D3"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D3/StaticBody3D"]
+shape = SubResource("ConcavePolygonShape3D_1l2oa")
+
+[node name="WorldPainter" type="MeshInstance3D" parent="MeshInstance3D3" node_paths=PackedStringArray("relevant_collisions")]
+mesh = SubResource("BoxMesh_ijd4p")
+script = ExtResource("4_heif3")
+map_resolution = Vector3i(50, 50, 50)
+world_space_resolution = true
+relevant_collisions = [NodePath("../StaticBody3D")]

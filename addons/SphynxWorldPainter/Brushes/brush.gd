@@ -17,13 +17,16 @@ func _ready():
 	direct_space_state = get_world_3d().direct_space_state
 	RenderingServer.call_on_render_thread(initialize_compute)
 
-func paint():
+func paint(brush_multiplier : float = 1):
 	var start_position : Vector3 = global_position
 	var end_position : Vector3 = global_position + global_basis.orthonormalized() * brush_direction * brush_distance
 	var raycast_results : Dictionary = raycast(start_position, end_position)
 	if raycast_results.is_empty():
 		return
-	WorldPainterSingleton.paint(raycast_results.collider, self, raycast_results.position, normal_to_basis(raycast_results.normal))
+	WorldPainterSingleton.paint(raycast_results.collider, self, raycast_results.position, normal_to_basis(raycast_results.normal), brush_multiplier)
+
+func erase():
+	paint(-1)
 
 func raycast(from : Vector3, to : Vector3) -> Dictionary:
 	var query_parameters : PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(from, to)

@@ -18,10 +18,10 @@ func _input(event: InputEvent) -> void:
 		draw_process()
 	
 	if Input.is_action_just_pressed("LeftClick"):
-		brush.paint()
+		brush.paint(0.5)
 	
 	if Input.is_action_just_pressed("RightClick"):
-		brush.paint()
+		brush.erase()
 
 
 func _process(delta: float) -> void:
@@ -46,18 +46,7 @@ func draw_process():
 	draw_timer.start()
 	
 	if Input.is_action_pressed("LeftClick"):
-		brush.paint()
+		brush.paint(0.5)
 	
 	if Input.is_action_pressed("RightClick"):
-		brush.paint()
-
-
-func normal_to_basis(normal : Vector3) -> Basis:
-	normal = normal.normalized()
-	var result_basis : Basis
-	var z : Vector3 = normal
-	var y : Vector3 = Vector3(0, 1, 0) if !normal.is_equal_approx(Vector3(0, 1, 0)) else Vector3(0, 0, 1)
-	var x : Vector3 = z.cross(y) if !normal.is_equal_approx(Vector3(0, 1, 0)) else Vector3(1, 0, 0)
-	y = z.cross(x) if !normal.is_equal_approx(Vector3(0, 1, 0)) else y
-	result_basis = Basis(x.normalized(), y.normalized(), z.normalized())
-	return result_basis
+		brush.erase()
