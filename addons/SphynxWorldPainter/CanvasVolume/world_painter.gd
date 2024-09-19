@@ -3,9 +3,7 @@ class_name WorldPainter
 
 @export var map_size : Vector3i = Vector3i(800, 800, 800)
 
-@export var brush_size : float = 1
-
-@export var paint_texture : Texture2D
+@export var relevant_collisions : Array[CollisionObject3D]
 
 var texture_3D_rd : Texture3DRD 
 
@@ -26,10 +24,10 @@ var shader_file : RDShaderFile
 var shader
 var pipeline
 
-
 func _ready():
 	RenderingServer.call_on_render_thread(initialize_compute)
 	get_surface_override_material(0).set_shader_parameter.call_deferred("world_paint_texture", texture_3D_rd)
+	WorldPainterSingleton.subscribe_world_painter(self)
 
 
 func initialize_compute():
@@ -65,61 +63,24 @@ func initialize_compute():
 	
 	texture_uniform.add_id(texture_3D)
 	
-	var sampler_state := RDSamplerState.new()
-	
-	sampler_state.min_filter = RenderingDevice.SAMPLER_FILTER_LINEAR
-	sampler_state.mag_filter = RenderingDevice.SAMPLER_FILTER_LINEAR
-	sampler_state.repeat_u = RenderingDevice.SAMPLER_REPEAT_MODE_REPEAT
-	sampler_state.repeat_v = RenderingDevice.SAMPLER_REPEAT_MODE_REPEAT
-	
-	var linear_sampler : RID = rd.sampler_create(sampler_state)
-	
-	var paint_image : Image = paint_texture.get_image()
-	paint_image.clear_mipmaps()
-	paint_image.decompress()
-	paint_image.convert(Image.FORMAT_RGBAF)
-	
-	var paint_texture_format : RDTextureFormat = RDTextureFormat.new()
-	paint_texture_format.width = paint_image.get_width()
-	paint_texture_format.height = paint_image.get_height()
-	paint_texture_format.depth = 1
-	
-	paint_texture_format.texture_type = RenderingDevice.TEXTURE_TYPE_2D
-	
-	paint_texture_format.format = RenderingDevice.DATA_FORMAT_R32G32B32A32_SFLOAT
-	
-	paint_texture_format.usage_bits = RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_STORAGE_BIT
-	
-	var paint_texture_view : RDTextureView = RDTextureView.new()
-	
-	var paint_texture_rd = rd.texture_create(paint_texture_format, paint_texture_view, [paint_image.get_data()])
-	
-	var paint_texture_uniform = RDUniform.new()
-	paint_texture_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
-	paint_texture_uniform.binding = 1
-	paint_texture_uniform.add_id(linear_sampler)
-	paint_texture_uniform.add_id(paint_texture_rd)
-	
-	uniform_set = rd.uniform_set_create([texture_uniform, paint_texture_uniform], shader, 0)
-	
 	texture_3D_rd = Texture3DRD.new()
 	texture_3D_rd.texture_rd_rid = texture_3D
 
 
-func paint(in_position : Vector3, in_basis : Basis, brush_multiplier : float):
+func paint(brush : WorldBrush, in_position : Vector3, in_basis : Basis, brush_multiplier : float):
 	print(in_position)
 	in_position = global_basis.inverse() * (in_position - global_position)
 	
 	in_position = (in_position + Vector3(0.5, 0.5, 0.5)) * Vector3(map_size)
 	
-	compute_size = Vector3(brush_size, brush_size, brush_size) / global_transform.basis.get_scale() * Vector3(map_size)
+	compute_size = Vector3(brush.brush_size, brush.brush_size, brush.brush_size) / global_transform.basis.get_scale() * Vector3(map_size)
 	
 	compute_size = (compute_size - Vector3i(1, 1, 1)) / 8 + Vector3i(1, 1, 1)
 	
-	RenderingServer.call_on_render_thread(render_paint.bind(in_position, in_basis, global_basis.orthonormalized(), brush_multiplier))
+	RenderingServer.call_on_render_thread(render_paint.bind(brush, in_position, in_basis, global_basis.orthonormalized(), brush_multiplier))
 
 
-func render_paint(in_position : Vector3, in_basis : Basis, volume_basis : Basis, brush_multiplier : float):	
+func render_paint(brush : WorldBrush, in_position : Vector3, in_basis : Basis, volume_basis : Basis, brush_multiplier : float):	
 	var push_constants : PackedFloat32Array = [
 		in_position.x,
 		in_position.y,
@@ -161,6 +122,8 @@ func render_paint(in_position : Vector3, in_basis : Basis, volume_basis : Basis,
 	var byte_push_constants = push_constants.to_byte_array()
 	
 	byte_push_constants.append_array(int_push_constants.to_byte_array())
+	
+	uniform_set = rd.uniform_set_create([texture_uniform, brush.paint_texture_uniform], shader, 0)
 	
 	compute_list = rd.compute_list_begin()
 	
