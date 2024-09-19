@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=4 uid="uid://cos7vsxw5wgwr"]
+[gd_scene load_steps=19 format=4 uid="uid://cos7vsxw5wgwr"]
 
 [ext_resource type="Script" path="res://addons/SphynxWorldPainter/Brushes/brush.gd" id="1_ajrm1"]
 [ext_resource type="Script" path="res://camera.gd" id="1_b1smw"]
@@ -63,6 +63,13 @@ data = PackedVector3Array(0, 1, 0, 0, 1, 0, 0, 0.9955, 0.0951, 0, 1, 0, 0.0093, 
 radius = 1.0
 height = 2.0
 
+[sub_resource type="BoxMesh" id="BoxMesh_fh8sw"]
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_1l2oa"]
+data = PackedVector3Array(-0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, -0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ijd4p"]
+
 [node name="Node3D" type="Node3D"]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
@@ -97,7 +104,7 @@ shape = SubResource("ConcavePolygonShape3D_d543q")
 [node name="WorldPainter" type="MeshInstance3D" parent="Suzanne" node_paths=PackedStringArray("relevant_collisions")]
 mesh = SubResource("ArrayMesh_kp4uw")
 script = ExtResource("2_ukjvu")
-map_size = Vector3i(100, 100, 100)
+map_resolution = Vector3i(100, 100, 100)
 relevant_collisions = [NodePath("../StaticBody3D")]
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
@@ -114,5 +121,21 @@ shape = SubResource("ConcavePolygonShape3D_a4pff")
 mesh = SubResource("SphereMesh_nj0og")
 skeleton = NodePath("../../Suzanne")
 script = ExtResource("2_ukjvu")
-map_size = Vector3i(100, 100, 100)
+map_resolution = Vector3i(100, 100, 100)
+relevant_collisions = [NodePath("../StaticBody3D")]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 10, 0, 0, 0, 1, 4.75628, 1.4043, 0)
+mesh = SubResource("BoxMesh_fh8sw")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/StaticBody3D"]
+shape = SubResource("ConcavePolygonShape3D_1l2oa")
+
+[node name="WorldPainter" type="MeshInstance3D" parent="MeshInstance3D" node_paths=PackedStringArray("relevant_collisions")]
+mesh = SubResource("BoxMesh_ijd4p")
+script = ExtResource("2_ukjvu")
+map_resolution = Vector3i(50, 50, 50)
+world_space_resolution = true
 relevant_collisions = [NodePath("../StaticBody3D")]

@@ -1,6 +1,8 @@
 shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_disabled, diffuse_burley, specular_schlick_ggx, shadows_disabled;
 
+const float EPSILON = 1e-3;
+
 uniform vec4 albedo : source_color;
 uniform sampler2D texture_albedo : source_color, filter_linear_mipmap, repeat_enable;
 
@@ -79,7 +81,7 @@ void fragment() {
 	
 	vec3 local_position = inverse(model_matrix) * (world_position - model_position) + vec3(0.5);
 	
-	if (local_position.x > 1. || local_position.x < 0. || local_position.y > 1. || local_position.y < 0. || local_position.z > 1. || local_position.z < 0.)
+	if (local_position.x > 1. + EPSILON || local_position.x < 0. - EPSILON || local_position.y > 1. + EPSILON || local_position.y < 0. - EPSILON || local_position.z > 1. + EPSILON || local_position.z < 0. - EPSILON)
 	{
 		discard;
 	}

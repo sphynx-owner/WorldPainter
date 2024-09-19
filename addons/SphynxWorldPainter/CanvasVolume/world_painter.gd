@@ -2,8 +2,16 @@ extends MeshInstance3D
 class_name WorldPainter
 
 const world_painter_material : Material = preload("res://addons/SphynxWorldPainter/CanvasVolume/Materials/world_painter_material.tres")
-
-@export var map_size : Vector3i = Vector3i(800, 800, 800)
+## The pixel count in each dimension of the 3D paint texture.[br][br]
+## [color=yellow]Warning:[/color] Having too many pixels assigned across
+## all your world paint textures can easily lead to GPU memory limits being reached
+## avoid having more than 1,000,000 pixels per world painter.[br]
+@export var map_resolution : Vector3i = Vector3i(800, 800, 800)
+## Wether the pixel count scales with the texture or represents the resolution per
+## world unit.[br][br]
+## [color=yellow]Warning:[/color] this counts the meshe's extents as well, meaning larger
+## mesh assets would increase the pixel count.[br]
+@export var world_space_resolution : bool = false
 
 @export var relevant_collisions : Array[CollisionObject3D]
 
@@ -46,10 +54,13 @@ func initialize_compute():
 	shader = rd.shader_create_from_spirv(shader_spirv)
 	pipeline = rd.compute_pipeline_create(shader)
 	
+	if world_space_resolution:
+		map_resolution = Vector3i(Vector3(map_resolution) * global_transform.basis.scaled(mesh_extents).get_scale())
+	
 	var texture_3D_format : RDTextureFormat = RDTextureFormat.new()
-	texture_3D_format.width = map_size.x
-	texture_3D_format.height = map_size.y
-	texture_3D_format.depth = map_size.z
+	texture_3D_format.width = map_resolution.x
+	texture_3D_format.height = map_resolution.y
+	texture_3D_format.depth = map_resolution.z
 	
 	texture_3D_format.texture_type = RenderingDevice.TEXTURE_TYPE_3D
 	
@@ -77,9 +88,9 @@ func paint(brush : WorldBrush, in_position : Vector3, in_basis : Basis, brush_mu
 	print(in_position)
 	in_position = global_basis.scaled(mesh_extents).inverse() * (in_position - global_position)
 	
-	in_position = (in_position + Vector3(0.5, 0.5, 0.5)) * Vector3(map_size)
+	in_position = (in_position + Vector3(0.5, 0.5, 0.5)) * Vector3(map_resolution)
 	
-	compute_size = Vector3(brush.brush_size, brush.brush_size, brush.brush_size) / global_transform.basis.scaled(mesh_extents).get_scale() * Vector3(map_size)
+	compute_size = Vector3(brush.brush_size, brush.brush_size, brush.brush_size) / global_transform.basis.scaled(mesh_extents).get_scale() * Vector3(map_resolution)
 	
 	compute_size = (compute_size - Vector3i(1, 1, 1)) / 8 + Vector3i(1, 1, 1)
 	
