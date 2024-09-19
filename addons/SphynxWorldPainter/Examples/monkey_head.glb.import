@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://b5hbapxn3i7ag"
-path="res://.godot/imported/monkey_head.glb-082b02d1392e67d4aa110d84939534b3.scn"
+path="res://.godot/imported/monkey_head.glb-c8cf1832b71f3f5d4c030abcfee47683.scn"
 
 [deps]
 
-source_file="res://monkey_head.glb"
-dest_files=["res://.godot/imported/monkey_head.glb-082b02d1392e67d4aa110d84939534b3.scn"]
+source_file="res://addons/SphynxWorldPainter/Examples/monkey_head.glb"
+dest_files=["res://.godot/imported/monkey_head.glb-c8cf1832b71f3f5d4c030abcfee47683.scn"]
 
 [params]
 

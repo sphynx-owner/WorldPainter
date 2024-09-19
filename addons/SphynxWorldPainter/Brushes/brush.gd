@@ -5,6 +5,8 @@ class_name WorldBrush
 
 @export var brush_distance : float = 10;
 
+@export var brush_direction : Vector3 = Vector3(0, 0, -1)
+
 @export var paint_texture : Texture2D
 
 var paint_texture_uniform : RDUniform 
@@ -17,7 +19,7 @@ func _ready():
 
 func paint():
 	var start_position : Vector3 = global_position
-	var end_position : Vector3 = global_position + -global_basis.z.normalized() * brush_distance
+	var end_position : Vector3 = global_position + global_basis.orthonormalized() * brush_direction * brush_distance
 	var raycast_results : Dictionary = raycast(start_position, end_position)
 	if raycast_results.is_empty():
 		return
@@ -70,7 +72,7 @@ func normal_to_basis(normal : Vector3) -> Basis:
 	normal = normal.normalized()
 	var result_basis : Basis
 	var z : Vector3 = normal
-	var y : Vector3 = Vector3(0, 1, 0) if !normal.is_equal_approx(Vector3(0, 1, 0)) else Vector3(0, 0, 1)
+	var y : Vector3 = Vector3(0, 1, 0) if !normal.abs().is_equal_approx(Vector3(0, 1, 0)) else Vector3(0, 0, 1)
 	var x : Vector3 = z.cross(y) if !normal.is_equal_approx(Vector3(0, 1, 0)) else Vector3(1, 0, 0)
 	y = z.cross(x) if !normal.is_equal_approx(Vector3(0, 1, 0)) else y
 	result_basis = Basis(x.normalized(), y.normalized(), z.normalized())

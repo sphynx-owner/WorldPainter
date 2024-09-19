@@ -1,10 +1,10 @@
 [gd_scene load_steps=19 format=4 uid="uid://cos7vsxw5wgwr"]
 
-[ext_resource type="Script" path="res://addons/SphynxWorldPainter/Brushes/brush.gd" id="1_ajrm1"]
-[ext_resource type="Script" path="res://camera.gd" id="1_b1smw"]
-[ext_resource type="Script" path="res://mesh_instance_3d.gd" id="2_4gu3u"]
-[ext_resource type="Script" path="res://addons/SphynxWorldPainter/CanvasVolume/world_painter.gd" id="2_ukjvu"]
-[ext_resource type="Texture2D" uid="uid://pf6gcvcphwgi" path="res://icon.svg" id="3_g0cbk"]
+[ext_resource type="Script" path="res://addons/SphynxWorldPainter/Examples/camera.gd" id="1_b6qm6"]
+[ext_resource type="Script" path="res://addons/SphynxWorldPainter/Brushes/brush.gd" id="2_ysy8i"]
+[ext_resource type="Texture2D" uid="uid://pf6gcvcphwgi" path="res://addons/SphynxWorldPainter/Examples/icon.svg" id="3_suqvq"]
+[ext_resource type="Script" path="res://addons/SphynxWorldPainter/CanvasVolume/world_painter.gd" id="4_heif3"]
+[ext_resource type="Script" path="res://addons/SphynxWorldPainter/Examples/mesh_instance_3d.gd" id="5_n5sie"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_mmuq4"]
 
@@ -80,16 +80,16 @@ environment = SubResource("Environment_4f64g")
 
 [node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("draw_timer", "brush")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.73339, 2.84213, 14.5993)
-script = ExtResource("1_b1smw")
+script = ExtResource("1_b6qm6")
 draw_timer = NodePath("Timer")
-brush = NodePath("WorldBrush2")
+brush = NodePath("WorldBrush")
 
 [node name="Timer" type="Timer" parent="Camera3D"]
 wait_time = 0.05
 
-[node name="WorldBrush2" type="Node3D" parent="Camera3D"]
-script = ExtResource("1_ajrm1")
-paint_texture = ExtResource("3_g0cbk")
+[node name="WorldBrush" type="Node3D" parent="Camera3D"]
+script = ExtResource("2_ysy8i")
+paint_texture = ExtResource("3_suqvq")
 
 [node name="Suzanne" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.62603, 1.04532, 0.894981)
@@ -103,14 +103,14 @@ shape = SubResource("ConcavePolygonShape3D_d543q")
 
 [node name="WorldPainter" type="MeshInstance3D" parent="Suzanne" node_paths=PackedStringArray("relevant_collisions")]
 mesh = SubResource("ArrayMesh_kp4uw")
-script = ExtResource("2_ukjvu")
+script = ExtResource("4_heif3")
 map_resolution = Vector3i(100, 100, 100)
 relevant_collisions = [NodePath("../StaticBody3D")]
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.04532, 0)
 mesh = SubResource("SphereMesh_10xwb")
-script = ExtResource("2_4gu3u")
+script = ExtResource("5_n5sie")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D2"]
 
@@ -120,7 +120,7 @@ shape = SubResource("ConcavePolygonShape3D_a4pff")
 [node name="WorldPainter2" type="MeshInstance3D" parent="MeshInstance3D2" node_paths=PackedStringArray("relevant_collisions")]
 mesh = SubResource("SphereMesh_nj0og")
 skeleton = NodePath("../../Suzanne")
-script = ExtResource("2_ukjvu")
+script = ExtResource("4_heif3")
 map_resolution = Vector3i(100, 100, 100)
 relevant_collisions = [NodePath("../StaticBody3D")]
 
@@ -135,7 +135,7 @@ shape = SubResource("ConcavePolygonShape3D_1l2oa")
 
 [node name="WorldPainter" type="MeshInstance3D" parent="MeshInstance3D" node_paths=PackedStringArray("relevant_collisions")]
 mesh = SubResource("BoxMesh_ijd4p")
-script = ExtResource("2_ukjvu")
+script = ExtResource("4_heif3")
 map_resolution = Vector3i(50, 50, 50)
 world_space_resolution = true
 relevant_collisions = [NodePath("../StaticBody3D")]
