@@ -3,7 +3,6 @@ render_mode blend_mix, depth_draw_opaque, cull_disabled, diffuse_burley, specula
 
 uniform vec4 albedo : source_color;
 uniform sampler2D texture_albedo : source_color, filter_linear_mipmap, repeat_enable;
-uniform float point_size : hint_range(0.1, 128.0, 0.1);
 
 uniform float roughness : hint_range(0.0, 1.0);
 uniform sampler2D texture_metallic : hint_default_white, filter_linear_mipmap, repeat_enable;
@@ -22,6 +21,7 @@ uniform sampler2D screen_texture : hint_screen_texture, filter_nearest;
 uniform sampler2D depth_texture : hint_depth_texture, filter_nearest;
 
 uniform sampler3D world_paint_texture : repeat_disable;
+uniform vec3 mesh_extents = vec3(1);
 
 vec3 get_world(vec3 ndc, mat4 inverse_matrix){
 	vec4 world_position = inverse_matrix * vec4(ndc, 1.);
@@ -62,7 +62,22 @@ void fragment() {
 	
 	vec3 model_position = vec3(MODEL_MATRIX[3][0], MODEL_MATRIX[3][1], MODEL_MATRIX[3][2]);
 	
-	vec3 local_position = inverse(mat3(MODEL_MATRIX)) * (world_position - model_position) + vec3(0.5);
+	mat3 model_matrix = mat3(
+		vec3(
+			MODEL_MATRIX[0][0] * mesh_extents.x, 
+			MODEL_MATRIX[0][1] * mesh_extents.x, 
+			MODEL_MATRIX[0][2] * mesh_extents.x),
+		vec3(
+			MODEL_MATRIX[1][0] * mesh_extents.y, 
+			MODEL_MATRIX[1][1] * mesh_extents.y, 
+			MODEL_MATRIX[1][2] * mesh_extents.y),
+		vec3(
+			MODEL_MATRIX[2][0] * mesh_extents.z, 
+			MODEL_MATRIX[2][1] * mesh_extents.z, 
+			MODEL_MATRIX[2][2] * mesh_extents.z)
+	 );
+	
+	vec3 local_position = inverse(model_matrix) * (world_position - model_position) + vec3(0.5);
 	
 	if (local_position.x > 1. || local_position.x < 0. || local_position.y > 1. || local_position.y < 0. || local_position.z > 1. || local_position.z < 0.)
 	{

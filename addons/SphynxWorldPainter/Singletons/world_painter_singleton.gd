@@ -11,7 +11,7 @@ func subscribe_world_painter(world_painter : WorldPainter):
 			collision_paint_meshes[collision] = []
 		collision_paint_meshes[collision].append(world_painter)
 
-func paint(collision : CollisionObject3D, brush : WorldBrush, in_position : Vector3, in_basis : Basis, brush_multiplier : float):
+func paint(collision : CollisionObject3D, brush : WorldBrush, in_position : Vector3, in_basis : Basis, brush_multiplier : float = 1):
 	if !collision_paint_meshes.has(collision):
 		return
 	

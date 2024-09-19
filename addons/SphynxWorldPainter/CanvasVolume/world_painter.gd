@@ -1,6 +1,8 @@
 extends MeshInstance3D
 class_name WorldPainter
 
+const world_painter_material : Material = preload("res://addons/SphynxWorldPainter/CanvasVolume/Materials/world_painter_material.tres")
+
 @export var map_size : Vector3i = Vector3i(800, 800, 800)
 
 @export var relevant_collisions : Array[CollisionObject3D]
@@ -24,9 +26,13 @@ var shader_file : RDShaderFile
 var shader
 var pipeline
 
+@onready var mesh_extents : Vector3 = mesh.get_aabb().size
+
 func _ready():
 	RenderingServer.call_on_render_thread(initialize_compute)
+	set_surface_override_material(0, world_painter_material.duplicate())
 	get_surface_override_material(0).set_shader_parameter.call_deferred("world_paint_texture", texture_3D_rd)
+	get_surface_override_material(0).set_shader_parameter.call_deferred("mesh_extents", mesh_extents)
 	WorldPainterSingleton.subscribe_world_painter(self)
 
 
@@ -69,15 +75,17 @@ func initialize_compute():
 
 func paint(brush : WorldBrush, in_position : Vector3, in_basis : Basis, brush_multiplier : float):
 	print(in_position)
-	in_position = global_basis.inverse() * (in_position - global_position)
+	in_position = global_basis.scaled(mesh_extents).inverse() * (in_position - global_position)
 	
 	in_position = (in_position + Vector3(0.5, 0.5, 0.5)) * Vector3(map_size)
 	
-	compute_size = Vector3(brush.brush_size, brush.brush_size, brush.brush_size) / global_transform.basis.get_scale() * Vector3(map_size)
+	compute_size = Vector3(brush.brush_size, brush.brush_size, brush.brush_size) / global_transform.basis.scaled(mesh_extents).get_scale() * Vector3(map_size)
 	
 	compute_size = (compute_size - Vector3i(1, 1, 1)) / 8 + Vector3i(1, 1, 1)
 	
-	RenderingServer.call_on_render_thread(render_paint.bind(brush, in_position, in_basis, global_basis.orthonormalized(), brush_multiplier))
+	var volume_basis : Basis = global_basis.orthonormalized();
+	
+	RenderingServer.call_on_render_thread(render_paint.bind(brush, in_position, in_basis, volume_basis, brush_multiplier))
 
 
 func render_paint(brush : WorldBrush, in_position : Vector3, in_basis : Basis, volume_basis : Basis, brush_multiplier : float):	

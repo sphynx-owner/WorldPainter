@@ -1,14 +1,31 @@
-extends Node
+extends Node3D
 class_name WorldBrush
 
 @export var brush_size : float = 1
+
+@export var brush_distance : float = 10;
 
 @export var paint_texture : Texture2D
 
 var paint_texture_uniform : RDUniform 
 
+var direct_space_state : PhysicsDirectSpaceState3D 
+
 func _ready():
+	direct_space_state = get_world_3d().direct_space_state
 	RenderingServer.call_on_render_thread(initialize_compute)
+
+func paint():
+	var start_position : Vector3 = global_position
+	var end_position : Vector3 = global_position + -global_basis.z.normalized() * brush_distance
+	var raycast_results : Dictionary = raycast(start_position, end_position)
+	if raycast_results.is_empty():
+		return
+	WorldPainterSingleton.paint(raycast_results.collider, self, raycast_results.position, normal_to_basis(raycast_results.normal))
+
+func raycast(from : Vector3, to : Vector3) -> Dictionary:
+	var query_parameters : PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(from, to)
+	return direct_space_state.intersect_ray(query_parameters)
 
 func initialize_compute():
 	# We will be using our own RenderingDevice to handle the compute commands
@@ -48,3 +65,13 @@ func initialize_compute():
 	paint_texture_uniform.binding = 1
 	paint_texture_uniform.add_id(linear_sampler)
 	paint_texture_uniform.add_id(paint_texture_rd)
+
+func normal_to_basis(normal : Vector3) -> Basis:
+	normal = normal.normalized()
+	var result_basis : Basis
+	var z : Vector3 = normal
+	var y : Vector3 = Vector3(0, 1, 0) if !normal.is_equal_approx(Vector3(0, 1, 0)) else Vector3(0, 0, 1)
+	var x : Vector3 = z.cross(y) if !normal.is_equal_approx(Vector3(0, 1, 0)) else Vector3(1, 0, 0)
+	y = z.cross(x) if !normal.is_equal_approx(Vector3(0, 1, 0)) else y
+	result_basis = Basis(x.normalized(), y.normalized(), z.normalized())
+	return result_basis

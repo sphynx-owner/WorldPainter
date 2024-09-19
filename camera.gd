@@ -1,13 +1,10 @@
 extends Camera3D
 
-@export var raycast : RayCast3D 
-
 @export var draw_timer : Timer
 
 @export var brush : WorldBrush
 
 var can_draw : bool = true
-
 
 func _ready():
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -21,10 +18,10 @@ func _input(event: InputEvent) -> void:
 		draw_process()
 	
 	if Input.is_action_just_pressed("LeftClick"):
-		WorldPainterSingleton.paint(raycast.get_collider(), brush, raycast.get_collision_point(), normal_to_basis(raycast.get_collision_normal()), 1)
+		brush.paint()
 	
 	if Input.is_action_just_pressed("RightClick"):
-		WorldPainterSingleton.paint(raycast.get_collider(), brush, raycast.get_collision_point(), normal_to_basis(raycast.get_collision_normal()), -1)
+		brush.paint()
 
 
 func _process(delta: float) -> void:
@@ -49,10 +46,10 @@ func draw_process():
 	draw_timer.start()
 	
 	if Input.is_action_pressed("LeftClick"):
-		WorldPainterSingleton.paint(raycast.get_collider(), brush, raycast.get_collision_point(), normal_to_basis(raycast.get_collision_normal()), 1)
+		brush.paint()
 	
 	if Input.is_action_pressed("RightClick"):
-		WorldPainterSingleton.paint(raycast.get_collider(), brush, raycast.get_collision_point(), normal_to_basis(raycast.get_collision_normal()), -1)
+		brush.paint()
 
 
 func normal_to_basis(normal : Vector3) -> Basis:

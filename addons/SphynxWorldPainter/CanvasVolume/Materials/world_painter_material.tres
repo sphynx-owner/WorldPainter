@@ -1,0 +1,17 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://pb5kcqejhme0"]
+
+[ext_resource type="Shader" path="res://addons/SphynxWorldPainter/CanvasVolume/GDShaders/volumetric_world_painter_inside.gdshader" id="1_xhyss"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_xhyss")
+shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/point_size = null
+shader_parameter/roughness = null
+shader_parameter/metallic_texture_channel = null
+shader_parameter/specular = null
+shader_parameter/metallic = null
+shader_parameter/uv1_scale = null
+shader_parameter/uv1_offset = null
+shader_parameter/uv2_scale = null
+shader_parameter/uv2_offset = null
